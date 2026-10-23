@@ -1,0 +1,10 @@
+{
+ "_about": "Facts the drift monitor checks this repo's docs against. 'banned' = old names that must not appear in README/CLAUDE.md/STATUS.md/docs; 'allow' = files exempt; 'ignore' = checks that are intentional here.",
+ "repo": "carpenters-plans",
+ "database": "none (hub document store + browser copy)",
+ "hosting": "OVH VPS (static, Caddy)",
+ "domain": "woody.gallab.top",
+ "url": "https://woody.gallab.top",
+ "services": [],
+ "banned": []
+}

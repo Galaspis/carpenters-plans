@@ -1,0 +1,89 @@
+{
+  "id": "rolling-table",
+  "name": "שולחן עבודה על גלגלים",
+  "description": "שולחן עבודה נמוך עם משטח קרשים, מדף תחתון וארבעה גלגלים — לפי תוכנית הדוגמה (1500×800×690).",
+  "category": "סדנה",
+  "units": "mm",
+  "view": { "azimuth": 35, "elevation": 26 },
+  "spaces": [
+    { "id": "room", "label": "המקום שבו השולחן יעמוד", "fields": {
+      "width": { "label": "רוחב פנוי (מ\"מ)", "value": 2000 },
+      "depth": { "label": "עומק פנוי (מ\"מ)", "value": 1000 }
+    }}
+  ],
+  "profiles": {
+    "post":  { "label": "רגליים",         "t": 70, "w": 70 },
+    "rail":  { "label": "קורות מסגרת",     "t": 45, "w": 70 },
+    "board": { "label": "קרשי משטח ומדף", "t": 22, "w": 95 }
+  },
+  "params": [
+    { "id": "W", "label": "אורך המשטח", "value": 1500, "min": 800, "max": 2400, "step": 10, "suggest": "snap(min(2400, room_width - 200), 10)", "suggestNote": "הרוחב הפנוי פחות 200 מ\"מ מרווח הליכה", "fit": true },
+    { "id": "D", "label": "רוחב המשטח", "value": 800,  "min": 500, "max": 1200, "step": 10, "suggest": "snap(min(1200, room_depth - 200), 10)", "suggestNote": "העומק הפנוי פחות 200 מ\"מ מרווח הליכה", "fit": true },
+    { "id": "H", "label": "גובה המשטח (ללא גלגלים)", "value": 690, "min": 400, "max": 950, "step": 10 },
+    { "id": "shelfH", "label": "גובה המדף התחתון", "value": 280, "min": 100, "max": 500, "step": 10 },
+    { "id": "gap", "label": "רווח מינימלי בין קרשים", "value": 10, "min": 0, "max": 20, "step": 1 },
+    { "id": "ov", "label": "בליטת המשטח מעבר לרגליים", "value": 20, "min": 0, "max": 80, "step": 5 },
+    { "id": "wheelH", "label": "גובה הגלגלים", "value": 100, "min": 0, "max": 150, "step": 5 }
+  ],
+  "derived": {
+    "legH": "H - board_t",
+    "innerW": "W - 2*ov - 2*post_t",
+    "innerD": "D - 2*ov - 2*post_t",
+    "nTop": "floor((D + gap) / (board_w + gap))",
+    "gapTop": "nTop > 1 ? (D - nTop*board_w) / (nTop - 1) : 0",
+    "topStart": "0",
+    "nShelf": "floor((innerD + gap) / (board_w + gap))",
+    "gapShelf": "nShelf > 1 ? (innerD - nShelf*board_w) / (nShelf - 1) : 0",
+    "shelfStart": "ov + post_t",
+    "nMid": "max(1, round(W / 600) - 1)"
+  },
+  "dims": [
+    { "label": "מדף", "value": "shelfH", "from": ["-90", "D", "0"], "to": ["-90", "D", "shelfH"] }
+  ],
+  "parts": [
+    { "id": "leg", "name": "רגל", "profile": "post", "count": 4,
+      "at": ["ov + (i % 2)*(W - 2*ov - post_t)", "ov + floor(i/2)*(D - 2*ov - post_t)", "0"], "size": ["post_t", "post_t", "legH"] },
+    { "id": "longRail", "name": "קורה ארוכה עליונה", "profile": "rail", "count": 2,
+      "at": ["ov + post_t", "ov + i*(D - 2*ov - post_t) + (post_t - rail_t)/2", "legH - rail_w"], "size": ["innerW", "rail_t", "rail_w"] },
+    { "id": "shortRail", "name": "קורה קצרה עליונה", "profile": "rail", "count": 2,
+      "at": ["ov + i*(W - 2*ov - post_t) + (post_t - rail_t)/2", "ov + post_t", "legH - rail_w"], "size": ["rail_t", "innerD", "rail_w"] },
+    { "id": "midRail", "name": "תומך אמצעי למשטח", "profile": "rail", "count": "nMid",
+      "at": ["ov + post_t + (i+1)*(innerW)/(nMid+1) - rail_t/2", "ov + (post_t + rail_t)/2", "legH - rail_w"], "size": ["rail_t", "D - 2*ov - post_t - rail_t", "rail_w"] },
+    { "id": "longShelfRail", "name": "קורה ארוכה למדף", "profile": "rail", "count": 2,
+      "at": ["ov + post_t", "ov + i*(D - 2*ov - post_t) + (post_t - rail_t)/2", "shelfH - board_t - rail_w"], "size": ["innerW", "rail_t", "rail_w"] },
+    { "id": "shortShelfRail", "name": "קורה קצרה למדף", "profile": "rail", "count": 2,
+      "at": ["ov + i*(W - 2*ov - post_t) + (post_t - rail_t)/2", "ov + post_t", "shelfH - board_t - rail_w"], "size": ["rail_t", "innerD", "rail_w"] },
+    { "id": "shelfBearer", "name": "תומך מדף", "profile": "rail", "count": "nMid",
+      "at": ["ov + post_t + (i+1)*(innerW)/(nMid+1) - rail_t/2", "ov + (post_t + rail_t)/2", "shelfH - board_t - rail_w"], "size": ["rail_t", "D - 2*ov - post_t - rail_t", "rail_w"] },
+    { "id": "topBoard", "name": "קרש משטח", "profile": "board", "count": "nTop",
+      "at": ["0", "topStart + i*(board_w + gapTop)", "H - board_t"], "size": ["W", "board_w", "board_t"] },
+    { "id": "shelfBoard", "name": "קרש מדף", "profile": "board", "count": "nShelf",
+      "at": ["ov + post_t", "shelfStart + i*(board_w + gapShelf)", "shelfH - board_t"], "size": ["innerW", "board_w", "board_t"] }
+  ],
+  "joints": [
+    { "a": "topBoard", "b": "leg", "method": "none" },
+    { "a": "topBoard", "b": "longRail", "count": 1 },
+    { "a": "topBoard", "b": "shortRail", "count": 1 },
+    { "a": "topBoard", "b": "midRail", "count": 1 },
+    { "a": "shelfBoard", "b": "longShelfRail", "method": "none" },
+    { "a": "shelfBoard", "b": "shortShelfRail", "count": 1 },
+    { "a": "shelfBoard", "b": "shelfBearer", "count": 1 },
+    { "a": "midRail", "b": "longRail", "through": "longRail" },
+    { "a": "shelfBearer", "b": "longShelfRail", "through": "longShelfRail" },
+    { "a": "shortRail", "b": "longRail", "method": "none" },
+    { "a": "shortShelfRail", "b": "longShelfRail", "method": "none" }
+  ],
+  "extras": [
+    { "name": "גלגל 100 מ\"מ עם בלם (פלטה 4 חורים)", "qty": 4, "price": 25, "icon": "wheel" },
+    { "name": "ברגי עץ 5×30 לגלגלים", "qty": 16, "price": 0.5, "icon": "screwSmall" }
+  ],
+  "steps": [
+    { "title": "חיתוך וקידוח", "text": "חתוך את כל החלקים לפי תוכנית החיתוך וקדח לפי שרטוטי החלקים.", "add": [] },
+    { "title": "מסגרות הצד הקצרות", "text": "הברג קורה קצרה עליונה וקורה קצרה למדף בין שתי רגליים. חזור לצד השני.", "add": ["leg", "shortRail", "shortShelfRail"], "tip": "הקורות נכנסות באמצע עובי הרגל — בדוק שהן באותו גובה בשני הצדדים." },
+    { "title": "חיבור הצדדים", "text": "העמד את שתי המסגרות והברג את הקורות הארוכות העליונות ואת קורות המדף ביניהן.", "add": ["longRail", "longShelfRail"] },
+    { "title": "תומכים אמצעיים", "text": "הברג את התומכים האמצעיים דרך הקורות הארוכות.", "add": ["midRail", "shelfBearer"] },
+    { "title": "המדף התחתון", "text": "הנח את קרשי המדף בתוך המסגרת והברג לקורות.", "add": ["shelfBoard"] },
+    { "title": "המשטח", "text": "הנח את קרשי המשטח עם רווח אחיד והברג לקורות.", "add": ["topBoard"] },
+    { "title": "גלגלים וגימור", "text": "הפוך את השולחן והברג גלגל לתחתית כל רגל. לטש ומרח שמן.", "add": [] }
+  ]
+}

@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Woody — תוכניות נגרות</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F7F7F6">
+<link rel="icon" href="brand/favicon.ico" sizes="any">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="brand/apple-touch-icon.png?v=2">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/controls/OrbitControls.js": "./vendor/three/OrbitControls.js", "three/addons/renderers/SVGRenderer.js": "./vendor/three/SVGRenderer.js" } }</script>
+<style>
+  /* ---- Woody design tokens (woody-brand-kit/developer/design-tokens.css) ---- */
+  @font-face { font-family: Heebo; src: url('brand/fonts/Heebo.ttf'); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: 'Nunito Sans'; src: url('brand/fonts/NunitoSans.ttf'); font-weight: 200 900; font-display: swap; }
+  :root { --ink:#202125; --accent:#F4512E; --accent-text:#B93920; --selected:#FFF0E9; --canvas:#EFF0F1; --bg:#F7F7F6; --panel:#FFFFFF; --muted:#60656C; --line:#DFE1E3; --oak:#D9B17C;
+          --warn:#B93920; --ok:#2a7d4f; --soft:#F7F7F6; --r-control:10px; --r-panel:16px; --shadow:0 8px 28px rgb(32 33 37 / .08); }
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body { margin:0; font-family: Heebo, 'Nunito Sans', Arial, sans-serif; font-size:16px; background:var(--bg); color:var(--ink); }
+  button, input, select, textarea { font-family: inherit; }
+  input[type=number], .num, .numeric, td.num, th.num, .stat b, .stat-card b { font-family: 'Nunito Sans', Heebo, sans-serif; font-variant-numeric: tabular-nums; }
+  :focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .ic { width:22px; height:22px; flex:none; vertical-align:middle; }
+  .ic.lg { width:32px; height:32px; }
+
+  /* ---- header: 72px, white, thin line, logo on the right ---- */
+  header { height:72px; background:var(--panel); border-bottom:1px solid var(--line); padding:0 32px; display:flex; align-items:center; gap:18px; position:sticky; top:0; z-index:35; }
+  header .logo { height:40px; width:130px; object-fit:contain; cursor:pointer; display:block; }
+  header .pname { color:var(--muted); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:34vw; }
+  header .hgroup { margin-inline-start:auto; display:flex; gap:6px; align-items:center; }
+  header .hbtn { background:transparent; color:var(--ink); border:1px solid transparent; border-radius:var(--r-control); min-height:44px; padding:6px 12px; font-size:15px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+  header .hbtn:hover { background:var(--soft); border-color:var(--line); }
+  header .hbtn.crest { background:var(--accent); color:#fff; font-weight:700; }
+  header .hbtn[hidden] { display:none; }
+  .syncdot { width:10px; height:10px; border-radius:50%; background:var(--ok); margin-inline-start:4px; flex:none; } .syncdot[data-state=off] { background:var(--muted); } .syncdot[hidden] { display:none; }
+
+  /* ---- stepper: dots on a line ---- */
+  .stepper { display:flex; justify-content:center; gap:0; margin:26px auto 6px; max-width:720px; position:relative; --p:0%; }
+  .stepper[hidden] { display:none; }
+  .stepper { --edge:8.33%; }
+  .stepper::before { content:''; position:absolute; top:9px; right:var(--edge); left:var(--edge); height:2px; background:var(--line); }
+  .stepper::after { content:''; position:absolute; top:9px; right:var(--edge); width:calc((100% - 2 * var(--edge)) * var(--p) / 100%); height:2px; background:var(--ink); }
+  .stepper button { flex:1; background:transparent; border:none; cursor:pointer; color:var(--muted); font-size:15px; font-weight:500; padding:0; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; z-index:1; }
+  .stepper button .n { width:20px; height:20px; border-radius:50%; background:var(--line); border:4px solid var(--bg); box-shadow:0 0 0 2px var(--line); font-size:0; }
+  .stepper button.done .n { background:var(--ink); box-shadow:0 0 0 2px var(--ink); }
+  .stepper button.active { color:var(--accent-text); font-weight:700; }
+  .stepper button.active .n { background:var(--accent); box-shadow:0 0 0 2px var(--accent); transform:scale(1.2); }
+
+  /* ---- buttons ---- */
+  .btn { min-height:44px; padding:8px 18px; border-radius:var(--r-control); border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; font-size:15px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:hover { border-color:var(--ink); }
+  .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
+  .btn.primary .ic, header .hbtn.crest .ic { filter: brightness(0) invert(1); }
+  .btn.lg { white-space:normal; line-height:1.25; }
+  .btn.primary:hover { background:#e2461f; border-color:#e2461f; }
+  .btn.lg { font-size:18px; padding:14px 30px; min-height:56px; border-radius:12px; }
+  .btn.small { min-height:34px; padding:4px 12px; font-size:13px; font-weight:500; }
+  .btn.ghost { background:transparent; }
+  .btn.active { background:var(--selected); color:var(--accent-text); border-color:var(--accent); }
+  a { color:var(--accent-text); }
+
+  main { max-width:1200px; margin:0 auto; padding:14px 24px 60px; }
+  .step-head { margin:6px 0 18px; }
+  .step-head h2 { font-size:28px; margin:0 0 4px; font-weight:800; }
+  .step-head p { margin:0; color:var(--muted); font-size:16px; }
+  .step-nav { display:flex; justify-content:space-between; align-items:center; margin-top:24px; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--r-panel); padding:20px 22px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .card h3 { margin:0 0 12px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .card h4 { margin:14px 0 6px; font-size:15px; color:var(--muted); }
+  .two { display:grid; grid-template-columns: 1fr 1fr; gap:18px; align-items:start; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  .field { display:grid; grid-template-columns: 1fr 130px; gap:8px; align-items:center; margin-bottom:8px; font-size:16px; }
+  .field label small { display:block; color:var(--muted); font-size:12px; font-weight:400; }
+  .field input, .field select { font-size:16px; padding:8px 10px; border:1px solid var(--line); border-radius:var(--r-control); width:100%; direction:ltr; text-align:left; background:#fff; min-height:44px; }
+  .field select { direction:rtl; text-align:right; }
+  .field input.manual { border-color:var(--accent); box-shadow:0 0 0 3px var(--selected); }
+  .field small { grid-column: 1 / -1; color:var(--muted); font-size:13px; margin-top:-4px; }
+  .suggest { color:var(--accent-text); cursor:pointer; text-decoration:underline; font-weight:600; }
+  .switch { display:flex; gap:10px; align-items:center; font-size:16px; cursor:pointer; margin:6px 0; }
+  .switch input { width:22px; height:22px; accent-color:var(--accent); }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:var(--r-control); overflow:hidden; }
+  .seg button { min-height:40px; padding:4px 14px; border:none; background:#fff; cursor:pointer; font-size:15px; font-weight:600; color:var(--ink); border-inline-start:1px solid var(--line); }
+  .seg button:first-child { border-inline-start:none; }
+  .seg button.active { background:var(--selected); color:var(--accent-text); }
+  input[type=checkbox] { accent-color:var(--accent); }
+  .choices { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px; }
+  .choice { border:2px solid var(--line); border-radius:var(--r-panel); padding:18px; cursor:pointer; background:#fff; text-align:right; }
+  .choice:hover { border-color:var(--ink); }
+  .choice.active { border-color:var(--accent); background:var(--selected); }
+  .choice .ico { font-size:30px; }
+  .choice b { display:block; font-size:18px; margin:6px 0 4px; }
+  .choice span { color:var(--muted); font-size:14px; }
+  .status { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:12px; }
+  .stat-card { border-radius:12px; padding:12px 14px; background:var(--panel); border:1px solid var(--line); }
+  .stat-card b { display:block; font-size:22px; direction:ltr; text-align:right; font-weight:800; }
+  .stat-card span { font-size:13px; color:var(--muted); }
+  .stat-card.ok { border-color:#bfe3cd; background:#f0faf3; } .stat-card.bad { border-color:#f1c0b8; background:var(--selected); }
+  .stat-card.ok b { color:var(--ok); } .stat-card.bad b { color:var(--warn); }
+
+  /* ---- plan tabs: the tool dock ---- */
+  nav.tabs { display:flex; gap:4px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r-panel); padding:6px; box-shadow:var(--shadow); flex-wrap:wrap; }
+  nav.tabs button { min-width:84px; min-height:64px; padding:6px 12px; border:none; background:transparent; border-radius:12px; cursor:pointer; font-size:14px; font-weight:600; color:var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  nav.tabs button img { width:32px; height:32px; }
+  nav.tabs button:hover { background:var(--soft); }
+  nav.tabs button.active { background:var(--selected); color:var(--accent-text); box-shadow:inset 0 -3px 0 var(--accent); }
+  .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .toolbar .sp { flex:1; }
+
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { border-bottom:1px solid var(--line); padding:8px 10px; text-align:right; vertical-align:middle; }
+  th { background:var(--soft); font-weight:700; }
+  td.num, th.num { direction:ltr; text-align:left; }
+  table.big { font-size:15px; } table.big td, table.big th { padding:9px 10px; }
+  svg { max-width:100%; height:auto; display:block; }
+  .fig { direction:ltr; }
+  .warn { background:var(--selected); border:1px solid #f1c0b8; color:var(--warn); padding:10px 14px; border-radius:var(--r-control); font-size:14px; margin-bottom:12px; }
+  .warn.soft { background:#fff8e6; border-color:#f0dca0; color:#7a5a00; }
+  .ok { color:var(--ok); font-size:14px; margin-top:8px; }
+  .okline { color:var(--ok); font-weight:600; } .badline { color:var(--warn); font-weight:600; }
+  .muted { font-size:13px; color:var(--muted); }
+  .stat { display:inline-block; margin-left:26px; vertical-align:top; }
+  .stat b { display:block; font-size:22px; direction:ltr; text-align:right; font-weight:800; }
+  .stat span { font-size:13px; color:var(--muted); }
+  .step { display:grid; grid-template-columns: 1fr 1.2fr; gap:16px; align-items:start; }
+  .step .num { display:inline-block; width:36px; height:36px; border-radius:50%; background:var(--ink); color:#fff; text-align:center; line-height:36px; font-weight:700; margin-left:10px; }
+  .pill { display:inline-block; background:var(--canvas); border-radius:12px; padding:2px 10px; font-size:13px; margin:2px 0 2px 4px; }
+  .pill b { color:var(--accent-text); }
+  .hw { display:inline-flex; align-items:center; gap:4px; margin-left:12px; }
+  .hw .ico svg { width:26px; height:26px; }
+  .tip { font-size:14px; background:var(--selected); padding:8px 10px; border-radius:var(--r-control); border-right:3px solid var(--accent); }
+  .tools { display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap:10px; }
+  .tool { display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:var(--r-control); padding:8px; }
+  .tool svg { width:44px; height:44px; flex:none; }
+  .tool b { display:block; font-size:14px; }
+  .tool span { font-size:12px; color:var(--muted); }
+  .catalog-row { display:grid; grid-template-columns: 1.4fr 54px 54px 1.2fr 70px 72px 24px; gap:6px; margin-bottom:6px; font-size:14px; align-items:center; }
+  .catalog-row.head { color:var(--muted); font-size:12px; margin-bottom:2px; }
+  .catalog-row input { padding:6px 7px; border:1px solid var(--line); border-radius:8px; width:100%; direction:ltr; font-size:14px; }
+  .catalog-row input:first-child { direction:rtl; }
+  .catalog-row button { border:none; background:none; cursor:pointer; color:var(--warn); font-size:16px; }
+  .catalog-row select { font-size:13px; padding:4px; border:1px solid var(--line); border-radius:8px; }
+  .price-row { font-size:13px; color:var(--muted); margin:-2px 0 10px; display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center; }
+  .price-row input { width:64px; font-size:13px; padding:3px 5px; border:1px solid var(--line); border-radius:6px; direction:ltr; }
+  .hw-head, .hw-row { grid-template-columns: 54px 54px 60px 64px 24px; }
+  .inv-head, .inv-row { grid-template-columns: 1.6fr 100px 70px 1.2fr 24px; }
+  .inv-row input, .inv-row select { font-size:15px; padding:6px; }
+  .inv-row select { direction:rtl; }
+  .inv-row .measured { display:flex; gap:4px; align-items:center; font-size:12px; color:var(--muted); }
+  .inv-row .measured input { width:60px; }
+  .inline-price { padding:3px 5px; border:1px solid var(--accent); border-radius:6px; direction:ltr; }
+  .dropzone { border:2px dashed var(--line); border-radius:var(--r-control); padding:16px; text-align:center; color:var(--muted); font-size:14px; cursor:pointer; }
+  .dropzone.over { border-color:var(--accent); background:var(--selected); }
+  textarea.json { width:100%; min-height:320px; font:12px/1.4 Consolas, monospace; border:1px solid var(--line); border-radius:8px; padding:8px; direction:ltr; }
+  .photo { max-width:100%; max-height:260px; border-radius:var(--r-control); border:1px solid var(--line); }
+  .facename { font-size:13px; font-weight:600; color:#444; margin:10px 0 -4px; }
+  .partno { display:inline-block; min-width:32px; height:32px; border-radius:50%; background:var(--ink); color:#fff; text-align:center; line-height:32px; font-weight:700; font-size:15px; font-family:'Nunito Sans', sans-serif; }
+  .card.part h3 { display:flex; align-items:center; gap:10px; font-size:18px; }
+  .card.part h3 .dims { font-weight:normal; color:var(--muted); font-size:14px; margin-right:auto; }
+  .howto { font-size:14px; background:var(--soft); border-right:3px solid var(--accent); padding:8px 12px; border-radius:var(--r-control); margin:10px 0; line-height:1.6; }
+  details.help { margin:6px 0 10px; } details.help summary { cursor:pointer; color:var(--accent-text); font-size:13px; }
+  details.sect { border-top:1px solid var(--line); padding:10px 0; } details.sect summary { cursor:pointer; font-weight:700; color:var(--ink); font-size:16px; }
+  ol.todo { font-size:15px; line-height:1.7; margin:6px 0 0; padding-right:22px; }
+  .buy { font-size:16px; margin-bottom:10px; }
+  .board { margin:10px 0 16px; }
+  .boardtitle { font-size:14px; margin-bottom:3px; }
+  .sharebar { position:relative; display:flex; gap:8px; align-items:center; margin:0 0 14px; }
+  .sharebar .menu { position:absolute; top:40px; right:0; background:#fff; border:1px solid var(--line); border-radius:var(--r-control); box-shadow:var(--shadow); padding:6px; display:flex; flex-direction:column; gap:4px; z-index:30; min-width:180px; }
+  .sharebar .menu[hidden] { display:none; }
+  .sharebar .menu button { text-align:right; border:none; background:none; padding:8px 10px; font-size:15px; cursor:pointer; border-radius:6px; }
+  .sharebar .menu button:hover { background:var(--soft); }
+
+  /* ---- the canvas ---- */
+  .viewer3d { position:relative; height:520px; background:var(--canvas); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden; direction:ltr; }
+  .viewer3d.small { height:380px; }
+  .viewer3d .hint { position:absolute; left:10px; bottom:8px; font-size:12px; color:var(--muted); background:rgba(255,255,255,.85); padding:2px 8px; border-radius:10px; pointer-events:none; direction:rtl; }
+  .viewer3d .lbl { position:absolute; transform:translate(-50%,-50%); background:rgba(255,255,255,.94); border:1.5px solid var(--ink); border-radius:10px; padding:1px 7px; font-size:12px; font-weight:bold; color:var(--ink); pointer-events:none; white-space:nowrap; font-family:'Nunito Sans', sans-serif; }
+  .viewer3d .lbl.num { border-radius:50%; width:24px; height:24px; padding:0; line-height:21px; text-align:center; }
+  .viewer3d .lbl.dim { color:var(--accent-text); border-color:var(--accent); }
+  .viewer3d svg { position:absolute; inset:0; width:100%; height:100%; }
+  .modes { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .modes button { font-size:14px; min-height:40px; padding:5px 14px; border:1px solid var(--line); background:#fff; border-radius:var(--r-control); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .modes button.active { background:var(--selected); color:var(--accent-text); border-color:var(--accent); }
+  .modal { position:fixed; inset:0; background:rgba(32,33,37,.55); display:flex; align-items:center; justify-content:center; z-index:50; }
+  .modal .box { background:#fff; border-radius:var(--r-panel); width:min(96vw, 1100px); height:min(92vh, 760px); display:flex; flex-direction:column; padding:12px; }
+  .modal .box .viewer3d { flex:1; height:auto; }
+  .modal .head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .modal .head h3 { margin:0; flex:1; font-size:16px; }
+  .printmenu { position:fixed; top:80px; left:24px; background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:var(--r-panel); padding:14px 16px; box-shadow:var(--shadow); z-index:40; display:flex; flex-direction:column; gap:8px; font-size:15px; min-width:260px; }
+  .printmenu[hidden] { display:none; }
+  .printmenu label { display:flex; gap:8px; align-items:center; cursor:pointer; }
+  .printonly { display:none; }
+  .print3d { width:100%; max-height:170mm; object-fit:contain; background:var(--canvas); border:1px solid var(--line); border-radius:8px; }
+  .printhead { display:none; }
+
+  /* ---- project gallery ---- */
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap:16px; }
+  .proj { background:#fff; border:1px solid var(--line); border-radius:var(--r-panel); padding:14px; cursor:pointer; transition: box-shadow .15s, border-color .15s; position:relative; }
+  .proj:hover { box-shadow:var(--shadow); border-color:var(--ink); }
+  .proj .thumb { background:var(--canvas); border-radius:10px; padding:6px; margin-bottom:8px; direction:ltr; }
+  .proj .thumb-wait { height:150px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; }
+  .proj h3 { margin:0 0 4px; font-size:17px; }
+  .proj p { margin:0; font-size:13px; color:var(--muted); }
+  .proj .meta { font-size:12px; color:var(--accent-text); margin-top:6px; }
+  .proj.new { border-style:dashed; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:200px; color:var(--muted); text-align:center; gap:8px; }
+  .proj.new img { width:64px; height:64px; }
+  .proj .del { position:absolute; top:8px; left:8px; border:none; background:rgba(255,255,255,.9); color:var(--muted); border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:13px; }
+  .proj .del:hover { color:var(--warn); }
+
+  @media (max-width: 640px) {
+    body { font-size:17px; }
+    header { height:92px; padding:0 12px; gap:4px; }
+    header .logo { width:178px; height:56px; flex:none; }
+    header .hgroup { gap:2px; }
+    header .hbtn { min-width:46px; min-height:52px; padding:6px 6px; }
+    header .hbtn .ic { width:32px; height:32px; }
+    header .hbtn span.t { display:none; }
+    header .pname { display:none; }
+    main { padding:10px 16px 50px; }
+    .step-head h2 { font-size:26px; }
+    .stepper { margin:20px auto 4px; max-width:none; } .stepper button { font-size:14px; }
+    .btn { font-size:16px; min-height:48px; } .btn.lg { font-size:18px; width:100%; }
+    .step-nav { flex-direction:column-reverse; align-items:stretch; } .step-nav .btn { width:100%; }
+    .step-nav span:empty { display:none; }
+    .card { padding:16px 14px; }
+    .field { grid-template-columns: 1fr 110px; }
+    nav.tabs { overflow-x:auto; flex-wrap:nowrap; width:100%; }
+    nav.tabs button { min-width:76px; font-size:13px; }
+    .toolbar .sp { display:none; } .toolbar .btn { flex:1; }
+    .tabpane table { display:block; overflow-x:auto; white-space:nowrap; }
+    .step { grid-template-columns: 1fr; }
+    .stat { display:block; margin:0 0 10px; }
+    .modes button { flex:1 1 auto; white-space:nowrap; }
+    .status { grid-template-columns: 1fr 1fr; }
+    #inventoryEditor, #catalogEditor, #hardwareEditor, #purchaseRows { overflow-x:auto; }
+    #inventoryEditor .catalog-row, #catalogEditor .catalog-row, #hardwareEditor .catalog-row, #purchaseRows .catalog-row { min-width:520px; }
+  }
+
+  @page { size: A4 landscape; margin: 12mm; }
+  @media print {
+    header, .noprint, .viewer3d, .modal, #warnings, nav.tabs, .step-head, .step-nav, .toolbar, .stepper { display:none !important; }
+    .printonly { display:block !important; }
+    .printhead { display:flex !important; align-items:center; gap:16px; border-bottom:2px solid var(--ink); margin-bottom:10px; padding-bottom:6px; }
+    .printhead img { height:32px; }
+    .printhead h1 { font-size:20px; margin:0; } .printhead span { color:var(--muted); font-size:12px; }
+    body { background:#fff; } main { max-width:none; padding:0; }
+    #step-shop, #step-plan { display:block !important; }
+    .tabpane { display:block !important; page-break-before: always; }
+    .tabpane.print-hide { display:none !important; }
+    .tabpane::before { content: attr(data-title); display:block; font-size:18px; font-weight:700; margin:0 0 10px; color:var(--accent-text); }
+    .card { break-inside: avoid; border:1px solid #ddd; padding:10px 12px; margin-bottom:10px; box-shadow:none; }
+    .card.part, .step { break-inside: avoid; }
+    .stepsvg { display:none; }
+    .step { grid-template-columns: 1fr 1.4fr; }
+    img.print3d[src=""], img.print3d:not([src]) { display:none !important; }
+    table.big { font-size:13px; } ol.todo { font-size:13px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <img class="logo" id="homeBtn" src="brand/woody-header.svg" alt="Woody" title="הפרויקטים שלי">
+  <span class="pname" id="crumb"></span>
+  <span class="hgroup">
+    <button class="hbtn" id="yardBtn"><img class="ic" src="brand/icons/wood.svg" alt=""><span class="t">המחסן שלי</span></button>
+    <button class="hbtn crest" id="sendToWebBtn" hidden><img class="ic" src="brand/icons/export.svg" alt=""><span class="t">העבר הכל לאתר</span></button>
+    <button class="hbtn" id="backupBtn" title="גיבוי לקובץ"><img class="ic" src="brand/icons/save.svg" alt=""><span class="t">גיבוי</span></button>
+    <button class="hbtn" id="restoreBtn" title="שחזור מקובץ"><img class="ic" src="brand/icons/project-open.svg" alt=""><span class="t">שחזור</span></button>
+    <input type="file" id="restoreFile" accept=".json" hidden>
+    <span id="ver" hidden>v53</span>
+  </span>
+  <div id="printMenu" class="printmenu" hidden>
+    <b>מה להדפיס?</b>
+    <label><input type="checkbox" data-tab="overview" checked> סקירה ומודל</label>
+    <label><input type="checkbox" data-tab="shop" checked> קניות ועלות</label>
+    <label><input type="checkbox" data-tab="cut" checked> תוכנית חיתוך</label>
+    <label><input type="checkbox" data-tab="parts" checked> קידוח</label>
+    <label><input type="checkbox" data-tab="assembly" checked> הרכבה</label>
+    <div style="display:flex;gap:6px;margin-top:8px"><button class="btn small" id="printAll">הכל</button><span style="flex:1"></span><button class="btn primary" id="printGo"><img class="ic" src="brand/icons/pdf.svg" alt="">הדפס / שמור PDF</button></div>
+    <div class="muted">בחלון ההדפסה בחר "שמור כ-PDF". מומלץ A4 לרוחב.</div>
+  </div>
+</header>
+<nav class="stepper" id="stepper" hidden>
+  <button data-step="place"><span class="n">1</span>המקום</button>
+  <button data-step="sizes"><span class="n">2</span>המידות</button>
+  <button data-step="wood"><span class="n">3</span>העץ</button>
+  <button data-step="shop"><span class="n">4</span>הקניות</button>
+  <button data-step="bought"><span class="n">5</span>מה קניתי</button>
+  <button data-step="plan"><span class="n">6</span>התוכנית</button>
+</nav>
+<main>
+  <div class="page" id="page-home"></div>
+  <div class="page" id="page-new" hidden></div>
+
+  <div class="page" id="page-yard" hidden>
+    <div class="step-head"><h2>המחסן שלי</h2><p>מה מחסן העצים שלך מוכר ובאיזה מחיר. ממלאים פעם אחת; כל הפרויקטים משתמשים בזה.</p></div>
+    <div class="card">
+      <h3><img class="ic" src="brand/icons/wood.svg" alt="">סוגי עץ</h3>
+      <p class="muted">שם · עובי × רוחב (מ"מ) · האורכים שבהם הקרש נמכר · מחיר (למטר רץ או לקרש).</p>
+      <div id="catalogEditor"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="addLumber">+ הוסף סוג עץ</button><span style="flex:1"></span><button class="btn small ghost" id="saveCatalog">שמור לקובץ</button><button class="btn small ghost" id="loadCatalog">טען מקובץ</button><input type="file" id="catalogFile" accept=".json" hidden></div>
+      <div class="price-row" style="margin-top:12px">עובי להב המסור (kerf) <input id="kerf" type="number" min="0" step="0.5"> מ"מ · ניקוי קצה לכל קרש <input id="trim" type="number" min="0" step="1"> מ"מ</div>
+    </div>
+    <div class="card"><h3>הובלה</h3><div id="transportEditor"></div></div>
+    <div class="card"><h3><img class="ic" src="brand/icons/screw.svg" alt="">ברגים וגימור — מחירים</h3><div id="hardwareEditor"></div></div>
+    <div class="step-nav"><button class="btn primary lg" id="yardBack"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה</button><span></span></div>
+  </div>
+
+  <div class="page" id="page-project" hidden>
+    <section class="steppane" id="step-place" hidden>
+      <div class="step-head"><h2>איפה הרהיט יעמוד?</h2><p>מדוד את המקום. המידות בשלב הבא יוצעו לפי זה.</p></div>
+      <div class="two">
+        <div class="card"><h3><img class="ic" src="brand/icons/space.svg" alt="">המקום הפנוי (מ"מ)</h3><div id="spaces"></div></div>
+        <div class="card"><h3>תמונת השראה (לא חובה)</h3><div class="dropzone" id="photoDrop">גרור לכאן תמונה או לחץ לבחירה — תופיע בעמוד הראשון של התוכנית</div><img id="photo" class="photo" hidden style="margin-top:10px"></div>
+      </div>
+      <div class="step-nav"><button class="btn ghost noprint" id="saveAsMine" hidden><img class="ic" src="brand/icons/save.svg" alt="">שמור כפרויקט שלי</button><button class="btn primary lg" data-go="sizes">ממשיכים למידות<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></div>
+    </section>
+
+    <section class="steppane" id="step-sizes" hidden>
+      <div class="step-head"><h2>מה המידות שמתאימות לכם?</h2><p>המידות כבר מותאמות למקום שמדדת. שנה מה שתרצה — המודל מתעדכן מיד.</p></div>
+      <div class="two">
+        <div class="card"><h3><img class="ic" src="brand/icons/measure-tape.svg" alt="">מידות ותכונות</h3><div id="params"></div></div>
+        <div>
+          <div class="viewer3d small noprint" id="viewer3dPreview"><div class="hint">סובב: גרירה · זום: גלגלת</div></div>
+          <div class="status" id="statusCards" style="margin-top:12px"></div>
+        </div>
+      </div>
+      <div class="step-nav"><button class="btn ghost" data-go="place"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה</button><button class="btn primary lg" data-go="wood">ממשיכים לבחירת העץ<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></div>
+    </section>
+
+    <section class="steppane" id="step-wood" hidden>
+      <div class="step-head"><h2>העץ</h2><p>יש לך שאריות עץ מפרויקטים קודמים? הן ייכנסו לתוכנית לפני מה שצריך לקנות.</p></div>
+      <div class="card">
+        <h3><img class="ic" src="brand/icons/parts.svg" alt="">יש לך שאריות עץ בבית?</h3>
+        <label class="switch"><input type="checkbox" id="hasLeftovers"> <span>כן — אלה הקרשים שנשארו לי</span></label>
+        <div id="woodOwn" hidden style="margin-top:12px">
+          <p class="muted">בחר את סוג העץ מהמחסן, כתוב אורך וכמות. אם מדדת את הקרש והוא שונה מהמידה הנקובה (למשל 100×25 שיצא 93×20) — כתוב את המידה בפועל. מה שקנית לפרויקט הזה נרשם בשלב 5, לא כאן.</p>
+          <div id="inventoryEditor"></div>
+          <div id="fitOwnBox" hidden style="margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:10px">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="fitOwnBtn"><img class="ic" src="brand/icons/fit-view.svg" alt="">להקטין את הרהיט כך שייבנה רק מהשאריות</button><span class="muted">מחשב את הגרסה הגדולה ביותר (בתוך המקום) שלא צריכה קנייה.</span></div>
+            <div id="fitOwnMsg" class="muted" style="margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3><img class="ic" src="brand/icons/wood.svg" alt="">איזה עץ לכל חלק</h3>
+        <div id="woodBuyList"></div>
+        <p class="muted" style="margin-top:10px">סוגי העץ והמחירים מגיעים מ<a href="#" id="toYardFromWood">המחסן שלי</a>.</p>
+      </div>
+      <div class="step-nav"><button class="btn ghost" data-go="sizes"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה</button><button class="btn primary lg" data-go="shop">ממשיכים לרשימת הקניות<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></div>
+    </section>
+
+    <section class="steppane" id="step-shop" hidden>
+      <div class="step-head"><h2>רשימת הקניות</h2><p>מה לקנות ובכמה, לפי המחסן שלי. שלח לוואטסאפ או הדפס — ואז קונים.</p></div>
+      <div class="tabpane" id="tab-shop" data-title="קניות ועלות"></div>
+      <div class="step-nav"><button class="btn ghost" data-go="wood"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה</button><span style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-go="plan">דלג — לתוכנית</button><button class="btn primary lg" data-go="bought">קניתי — מה קיבלתי בפועל<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></span></div>
+    </section>
+
+    <section class="steppane" id="step-bought" hidden>
+      <div class="step-head"><h2>מה קניתי</h2><p>הרשימה מתחילה ממה שביקשנו לקנות. תקן אורכים, כמויות ומידות שמדדת — התוכנית תיבנה מהקרשים האלה. המחירים מהמחסן.</p></div>
+      <div class="card">
+        <h3><img class="ic" src="brand/icons/shopping.svg" alt="">הקרשים שקניתי</h3>
+        <div id="purchaseRows"></div>
+        <label class="switch" style="margin-top:14px"><input type="checkbox" id="purchaseDone"> <span>זה מה שקניתי — בנה את התוכנית מהקרשים האלה</span></label>
+        <div id="purchaseMsg" style="margin-top:8px"></div>
+      </div>
+      <div class="step-nav"><button class="btn ghost" data-go="shop"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה לרשימה</button><button class="btn primary lg" data-go="plan">ממשיכים לתוכנית<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></div>
+    </section>
+
+    <section class="steppane" id="step-plan" hidden>
+      <div class="step-head"><h2>התוכנית</h2><p id="planBasis">כל מה שצריך לבנייה. אפשר להדפיס הכל או חלק, ולשלוח כל רשימה בוואטסאפ.</p></div>
+      <div class="toolbar noprint">
+        <nav class="tabs">
+          <button data-tab="overview" class="active"><img src="brand/icons/overview.svg" alt="">סקירה</button>
+          <button data-tab="cut"><img src="brand/icons/cutting.svg" alt="">תוכנית חיתוך</button>
+          <button data-tab="parts"><img src="brand/icons/drilling.svg" alt="">קידוח</button>
+          <button data-tab="assembly"><img src="brand/icons/assembly.svg" alt="">הרכבה</button>
+        </nav>
+        <span class="sp"></span>
+        <button id="printBtn" class="btn primary"><img class="ic" src="brand/icons/pdf.svg" alt="">הורדת PDF</button>
+        <button id="jsonBtn" class="btn ghost small"><img class="ic" src="brand/icons/export.svg" alt="">ייצוא נתונים</button>
+      </div>
+      <div class="printhead printonly"><img src="brand/woody-header.svg" alt="Woody"><h1 id="printTitle"></h1><span id="printDate"></span></div>
+      <div id="warnings"></div>
+      <div class="tabpane" id="tab-overview" data-title="סקירה"></div>
+      <div class="tabpane" id="tab-cut" hidden data-title="תוכנית חיתוך"></div>
+      <div class="tabpane" id="tab-parts" hidden data-title="קידוח"></div>
+      <div class="tabpane" id="tab-assembly" hidden data-title="הרכבה"></div>
+      <details class="sect noprint" style="margin-top:20px"><summary>מתקדם — הגדרת העיצוב (JSON)</summary><div id="tab-design"></div></details>
+      <div class="step-nav noprint"><button class="btn ghost" data-go="bought"><img class="ic" src="brand/icons/back-rtl.svg" alt="">חזרה</button><span></span></div>
+    </section>
+
+  </div>
+</main>
+<input type="file" id="designFile" accept=".json" hidden>
+<script src="vendor/gallab-store.js"></script>
+<script type="module" src="js/app.js"></script>
+<script>if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

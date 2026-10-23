@@ -1,0 +1,614 @@
+{
+  "id": "irrigation-cabinet",
+  "name": "ארון השקיה (שלבים)",
+  "description": "ארון מסתור לברזי ההשקיה, הבקר וגלגלת הצינור, צמוד לשולחן הגינה: 4 עמודים, שלבים אופקיים בצד ובשתי הדלתות, גג קרשים עם בליטה, ללא גב וללא רצפה. הצד הפונה לשולחן פתוח — העמוד של השולחן סוגר אותו.",
+  "category": "גינה",
+  "units": "mm",
+  "view": {
+    "azimuth": 32,
+    "elevation": 26
+  },
+  "spaces": [
+    {
+      "id": "spot",
+      "label": "המקום ליד השולחן",
+      "fields": {
+        "width": {
+          "label": "רוחב פנוי (מ\"מ)",
+          "value": 1150
+        },
+        "depth": {
+          "label": "עומק: מהקיר עד קצה הגלגלת (מ\"מ)",
+          "value": 567
+        },
+        "height": {
+          "label": "גובה: ראש הגלגלת (מ\"מ)",
+          "value": 1200
+        }
+      }
+    }
+  ],
+  "profiles": {
+    "post": {
+      "label": "עמודים",
+      "t": 66,
+      "w": 66
+    },
+    "rail": {
+      "label": "מסגרת ודלתות",
+      "t": 42,
+      "w": 95
+    },
+    "slat": {
+      "label": "שלבים וגג",
+      "t": 20,
+      "w": 93
+    },
+    "frame": {
+      "label": "מסגרת הדלתות",
+      "t": 45,
+      "w": 45
+    },
+    "hinge": {
+      "label": "צירי T",
+      "t": 3,
+      "w": 40,
+      "hardware": true
+    },
+    "dslat": {
+      "label": "שלבי הדלתות (צרים, לעיצוב)",
+      "t": 20,
+      "w": 45
+    }
+  },
+  "params": [
+    {
+      "id": "W",
+      "label": "רוחב כללי (כולל בליטת הגג)",
+      "value": 1120,
+      "min": 600,
+      "max": 1600,
+      "step": 10,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(1600, spot_width - 20), 10)",
+      "suggestNote": "רוחב המקום פחות 20 מ\"מ"
+    },
+    {
+      "id": "D",
+      "label": "עומק כללי",
+      "value": 650,
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(800, spot_depth), 10)",
+      "suggestNote": "עומק המקום (כולל בליטת הגג)"
+    },
+    {
+      "id": "H",
+      "label": "גובה כללי",
+      "value": 1300,
+      "min": 800,
+      "max": 1900,
+      "step": 10,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(1900, spot_height), 10)",
+      "suggestNote": "גובה המקום"
+    },
+    {
+      "id": "doorCount",
+      "label": "דלתות",
+      "value": 2,
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "options": [
+        {
+          "value": 0,
+          "label": "בלי"
+        },
+        {
+          "value": 1,
+          "label": "אחת"
+        },
+        {
+          "value": 2,
+          "label": "שתיים"
+        }
+      ]
+    },
+    {
+      "id": "gap",
+      "label": "רווח בין השלבים (מ\"מ)",
+      "value": 15,
+      "min": 5,
+      "max": 40,
+      "step": 1
+    },
+    {
+      "id": "ov",
+      "label": "בליטת הגג מכל צד",
+      "value": 30,
+      "min": 0,
+      "max": 80,
+      "step": 5
+    },
+    {
+      "id": "hoseGap",
+      "label": "פתח לצינור בדלת — רווח מוגדל (מ\"מ)",
+      "value": 0,
+      "min": 0,
+      "max": 120,
+      "step": 5
+    },
+    {
+      "id": "sillZ",
+      "label": "גובה הקורות התחתונות מהרצפה (מ\"מ)",
+      "value": 0,
+      "min": 0,
+      "max": 400,
+      "step": 10
+    },
+    {
+      "id": "sillSides",
+      "label": "קורות תחתונות גם בצדדים",
+      "value": 1,
+      "min": 0,
+      "max": 1,
+      "step": 1
+    },
+    {
+      "id": "rightSide",
+      "label": "הארון עומד לבד (צד ימין סגור בשלבים)",
+      "value": 0,
+      "min": 0,
+      "max": 1,
+      "step": 1
+    },
+    {
+      "id": "benchD",
+      "label": "עומק השולחן הצמוד (מ\"מ)",
+      "value": 500,
+      "min": 300,
+      "max": 900,
+      "step": 10,
+      "showIf": "rightSide == 0"
+    },
+    {
+      "id": "benchPostH",
+      "label": "גובה העמוד האחורי של השולחן (מ\"מ)",
+      "value": 1500,
+      "min": 800,
+      "max": 2000,
+      "step": 10,
+      "showIf": "rightSide == 0"
+    }
+  ],
+  "derived": {
+    "ovR": "rightSide ? ov : 0",
+    "innerW": "W - ov - ovR - 2*post_t",
+    "innerD": "D - ov - post_t - post_t",
+    "postH": "H - slat_t",
+    "frameZ": "postH - rail_w",
+    "sideLen": "D - ov",
+    "sillBase": "sillSides ? sillZ : 0",
+    "nSide": "floor((postH - sillBase - 2*rail_w - 40 + gap) / (slat_w + gap))",
+    "sideStart": "sillBase + rail_w + 20",
+    "doorW": "doorCount > 0 ? (innerW - (doorCount + 1)*6) / doorCount : 0",
+    "doorH": "frameZ - rail_w - 12 - sillZ",
+    "doorSlatLen": "doorW",
+    "nDoor": "floor((doorH - 20 - hoseGap + gap) / (dslat_w + gap))",
+    "doorSlatStart": "doorH - 10 - (nDoor*dslat_w + (nDoor-1)*gap + hoseGap)",
+    "nTop": "floor((D + gap) / (slat_w + gap))",
+    "gapTop": "nTop > 1 ? (D - nTop*slat_w) / (nTop - 1) : 0",
+    "slatZ0": "sillZ + rail_w + 6 + doorSlatStart",
+    "hingeZ1": "slatZ0 + (dslat_w + gap) + (dslat_w - 40)/2",
+    "hingeZ2": "slatZ0 + (nDoor - 2)*(dslat_w + gap) + hoseGap + (dslat_w - 40)/2",
+    "doorX0": "ov + post_t + 6"
+  },
+  "dims": [],
+  "parts": [
+    {
+      "id": "post",
+      "name": "עמוד",
+      "profile": "post",
+      "count": 4,
+      "at": [
+        "ov + (i % 2)*(W - ov - ovR - post_t)",
+        "ov + floor(i/2)*(D - ov - post_t)",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "postH"
+      ]
+    },
+    {
+      "id": "topRailF",
+      "name": "קורת גג קדמית/אחורית",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "ov + post_t",
+        "ov + i*(D - ov - post_t) + (post_t - rail_t)/2",
+        "frameZ"
+      ],
+      "size": [
+        "innerW",
+        "rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "topRailS",
+      "name": "קורת גג צדדית",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "ov + i*(W - ov - ovR - post_t) + (post_t - rail_t)/2",
+        "ov + post_t",
+        "frameZ"
+      ],
+      "size": [
+        "rail_t",
+        "innerD",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "sill",
+      "name": "קורה תחתונה",
+      "profile": "rail",
+      "count": "2*sillSides + 1",
+      "at": [
+        "sillSides && i < 2 ? ov + i*(W - ov - ovR - post_t) + (post_t - rail_t)/2 : ov + post_t",
+        "sillSides && i < 2 ? ov + post_t : ov + (post_t - rail_t)/2",
+        "sillSides && i < 2 ? sillZ : sillZ"
+      ],
+      "size": [
+        "sillSides && i < 2 ? rail_t : innerW",
+        "sillSides && i < 2 ? innerD : rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "sideSlat",
+      "name": "שלב צד",
+      "profile": "slat",
+      "count": "nSide * (1 + rightSide)",
+      "at": [
+        "rightSide ? ((i % 2) ? W - ovR : ov - slat_t) : ov - slat_t",
+        "ov",
+        "sideStart + (rightSide ? floor(i/2) : i)*(slat_w + gap)"
+      ],
+      "size": [
+        "slat_t",
+        "sideLen",
+        "slat_w"
+      ]
+    },
+    {
+      "id": "stile",
+      "name": "ניצב דלת",
+      "profile": "frame",
+      "count": "2*doorCount",
+      "at": [
+        "doorX0 + (i % 2)*(doorW - frame_w) + floor(i/2)*(doorW + 6)",
+        "ov + dslat_t",
+        "sillZ + rail_w + 6"
+      ],
+      "size": [
+        "frame_w",
+        "frame_t",
+        "doorH"
+      ]
+    },
+    {
+      "id": "doorRail",
+      "name": "קורת דלת",
+      "profile": "frame",
+      "count": "2*doorCount",
+      "at": [
+        "doorX0 + frame_w + floor(i/2)*(doorW + 6)",
+        "ov + dslat_t",
+        "sillZ + rail_w + 6 + (i % 2)*(doorH - frame_w)"
+      ],
+      "size": [
+        "doorW - 2*frame_w",
+        "frame_t",
+        "frame_w"
+      ]
+    },
+    {
+      "id": "doorSlat",
+      "name": "שלב דלת",
+      "profile": "dslat",
+      "count": "nDoor*doorCount",
+      "at": [
+        "doorX0 + (i % max(1, doorCount))*(doorW + 6)",
+        "ov",
+        "sillZ + rail_w + 6 + doorSlatStart + floor(i/max(1, doorCount))*(dslat_w + gap) + (floor(i/max(1, doorCount)) >= nDoor - 3 ? hoseGap : 0)"
+      ],
+      "size": [
+        "doorW",
+        "dslat_t",
+        "dslat_w"
+      ]
+    },
+    {
+      "id": "topBoard",
+      "name": "קרש גג",
+      "profile": "slat",
+      "count": "nTop",
+      "at": [
+        "0",
+        "i*(slat_w + gapTop)",
+        "postH"
+      ],
+      "size": [
+        "W",
+        "slat_w",
+        "slat_t"
+      ]
+    },
+    {
+      "id": "hinge",
+      "name": "ציר T",
+      "profile": "hinge",
+      "count": "2*doorCount",
+      "at": [
+        "floor(i/2) == 0 ? ov + 20 : W - ovR - 140",
+        "ov - 3",
+        "i % 2 ? hingeZ2 : hingeZ1"
+      ],
+      "size": [
+        "120",
+        "3",
+        "40"
+      ]
+    },
+    {
+      "id": "benchBackPost",
+      "name": "העמוד האחורי של השולחן (קיים)",
+      "profile": "post",
+      "count": "1 - rightSide",
+      "existing": true,
+      "at": [
+        "W",
+        "benchD - ov - post_t",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "benchPostH"
+      ]
+    },
+    {
+      "id": "benchFrontLeg",
+      "name": "הרגל הקדמית של השולחן (קיימת)",
+      "profile": "post",
+      "count": "1 - rightSide",
+      "existing": true,
+      "at": [
+        "W",
+        "ov",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "878"
+      ]
+    }
+  ],
+  "joints": [
+    {
+      "a": "sideSlat",
+      "b": "post",
+      "through": "sideSlat",
+      "count": 1
+    },
+    {
+      "a": "doorSlat",
+      "b": "stile",
+      "through": "doorSlat",
+      "count": 1
+    },
+    {
+      "a": "doorSlat",
+      "b": "doorRail",
+      "method": "none"
+    },
+    {
+      "a": "doorRail",
+      "b": "stile",
+      "through": "stile"
+    },
+    {
+      "a": "topBoard",
+      "b": "topRailF",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "topRailS",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "topRailF",
+      "b": "topRailS",
+      "method": "none"
+    },
+    {
+      "a": "sill",
+      "b": "sill",
+      "method": "none"
+    },
+    {
+      "a": "sideSlat",
+      "b": "sideSlat",
+      "method": "none"
+    },
+    {
+      "a": "sideSlat",
+      "b": "topRailS",
+      "method": "none"
+    },
+    {
+      "a": "sideSlat",
+      "b": "sill",
+      "method": "none"
+    },
+    {
+      "a": "topBoard",
+      "b": "sideSlat",
+      "method": "none"
+    },
+    {
+      "a": "hinge",
+      "b": "post",
+      "through": "hinge",
+      "count": 2
+    },
+    {
+      "a": "hinge",
+      "b": "doorSlat",
+      "through": "hinge",
+      "count": 2
+    },
+    {
+      "a": "hinge",
+      "b": "stile",
+      "method": "none"
+    },
+    {
+      "a": "post",
+      "b": "benchBackPost",
+      "through": "post",
+      "count": 3
+    },
+    {
+      "a": "post",
+      "b": "benchFrontLeg",
+      "through": "post",
+      "count": 2
+    },
+    {
+      "a": "topBoard",
+      "b": "benchBackPost",
+      "method": "none"
+    },
+    {
+      "a": "sideSlat",
+      "b": "benchBackPost",
+      "method": "none"
+    },
+    {
+      "a": "sideSlat",
+      "b": "benchFrontLeg",
+      "method": "none"
+    }
+  ],
+  "extras": [
+    {
+      "name": "מגנט סגירה לדלת",
+      "qty": 2,
+      "price": 8,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "זוויות L לעיגון לקיר",
+      "qty": 2,
+      "price": 6,
+      "icon": "hook"
+    },
+    {
+      "name": "ציר T מגולוון 150 מ\"מ לדלתות חוץ",
+      "qty": 4,
+      "price": 20,
+      "icon": "hook"
+    }
+  ],
+  "steps": [
+    {
+      "title": "חיתוך וקידוח",
+      "text": "חתוך את כל החלקים לפי תוכנית החיתוך. ברוחב הקרש של השלבים — שמור על אותו רווח כמו בקיר השולחן.",
+      "add": []
+    },
+    {
+      "title": "מסגרת הגג על העמודים",
+      "text": "הברג את ארבע קורות הגג בין ארבעת העמודים, בקו אחד עם ראשי העמודים. בדוק אלכסונים.",
+      "add": [
+        "post",
+        "topRailF",
+        "topRailS"
+      ]
+    },
+    {
+      "title": "קורות הרצפה",
+      "text": "הברג את שתי קורות הצד ואת הסף הקדמי בין העמודים, בגובה הרצפה. הגב נשאר פתוח לצנרת.",
+      "add": [
+        "sill"
+      ]
+    },
+    {
+      "title": "שלבי הצדדים",
+      "text": "הברג את השלבים על הצד החיצוני של העמודים, מלמטה למעלה, עם שבלונה לרווח.",
+      "add": [
+        "sideSlat"
+      ]
+    },
+    {
+      "title": "הגג",
+      "text": "הנח את קרשי הגג ברוחב הארון, עם הבליטה, והברג למסגרת.",
+      "add": [
+        "topBoard"
+      ],
+      "tip": "אם יש חשמל בפנים — זה הגג שמחזיק אותו יבש."
+    },
+    {
+      "title": "מסגרת הדלת",
+      "add": [
+        "stile",
+        "doorRail"
+      ],
+      "text": "לכל דלת: הנח את שני הניצבים (קרשי המסגרת האנכיים) על הרצפה, במרחק של רוחב הדלת זה מזה, והברג ביניהם את שתי הקורות הרוחביות — אחת למעלה ואחת למטה, בקצוות. בדוק אלכסונים שווים כדי שהמסגרת תהיה מלבנית.",
+      "tip": "בנה את שתי הדלתות זו ליד זו על משטח ישר — כך הן יוצאות זהות."
+    },
+    {
+      "title": "שלבי הדלת",
+      "add": [
+        "doorSlat"
+      ],
+      "text": "הנח את המסגרת שטוחה והברג עליה את השלבים הצרים לרוחב, מלמעלה למטה, עם המרווח שבתוכנית (השתמש בקרש דק כמרווח). השלבים מכסים את המסגרת — הברג כל שלב בשני ברגים לכל ניצב.",
+      "tip": "התחל מהשלב העליון: הוא קובע את היישור של כל השאר."
+    },
+    {
+      "title": "תליית הדלתות על הצירים",
+      "text": "הברג את הצירים לדלת (על השלב, מול הניצב) — ציר עליון וציר תחתון. הרם את הדלת למקומה, שים מתחתיה קרש דק 6 מ\"מ כמרווח מהקורה התחתונה, והברג את הצירים לעמוד הארון. בדוק שהדלת נסגרת חופשי ושני הדלתות באותו גובה.",
+      "add": [
+        "hinge"
+      ],
+      "tip": "הצירים יושבים על השלב השני מלמטה ועל השלב השני מלמעלה — שם יש עץ מאחורי השלב (הניצב)."
+    },
+    {
+      "title": "חיבור לשולחן",
+      "text": "הצמד את הארון לשולחן כך שהעמוד האחורי־ימני שלו נוגע בעמוד האחורי של השולחן והעמוד הקדמי־ימני ברגל הקדמית. הברג דרך עמודי הארון אל עמודי השולחן (כוס Ø12 ואז בורג 5×100): 3 ברגים מאחור, 2 מלפנים. כך הארון לא יכול להתנדנד, והגג שלו מסתיים בדיוק על העמוד של השולחן.",
+      "add": [
+        "benchBackPost",
+        "benchFrontLeg"
+      ],
+      "tip": "השולחן מצויר באפור — הוא כבר קיים, לא חותכים ולא קונים אותו."
+    }
+  ]
+}

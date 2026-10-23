@@ -1,0 +1,41 @@
+# Woody (Carpenter's Plans). Install as /etc/caddy/sites/woody.caddy, then: sudo systemctl reload caddy
+# Static PWA, behind the shared Google login. Mirrors the earlier static-hosting rules:
+# clean URLs, no-cache for the app files (so phones pick up new versions), immutable vendor/.
+# "import datastore" gives the app the hub's document store at /api/family/woody (shared) and /api/data/woody (per person).
+woody.gallab.top {
+    encode zstd gzip
+    header {
+        X-Robots-Tag "noindex, nofollow"
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    route {
+        request_header -Remote-User
+        request_header -Remote-Email
+        request_header -Remote-Name
+        request_header -Remote-Groups
+
+        # Icons and the manifest are public: phones fetch them WITHOUT the login cookie when adding
+        # the app to the home screen, and would otherwise get a blank icon.
+        @public path /brand/* /manifest.webmanifest /icon.svg /icon-192.png /icon-512.png
+        handle @public {
+            root * /srv/woody/site
+            header Cache-Control "public, max-age=86400"
+            header /manifest.webmanifest Content-Type "application/manifest+json"
+            file_server
+        }
+
+        import auth
+        import datastore
+
+        root * /srv/woody/site
+        @app path *.html *.js *.json *.webmanifest /sw.js
+        header @app Cache-Control "no-cache"
+        @vendor path /vendor/*
+        header @vendor Cache-Control "public, max-age=31536000, immutable"
+        try_files {path} {path}.html {path}/index.html
+        file_server
+    }
+}

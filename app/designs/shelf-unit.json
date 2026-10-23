@@ -1,0 +1,58 @@
+{
+  "id": "shelf-unit",
+  "name": "יחידת מדפים",
+  "description": "ארבעה עמודים ומדפים מקרשים, לכל גובה ומספר מדפים. מתאים למחסן, למרפסת או לגינה.",
+  "category": "אחסון",
+  "units": "mm",
+  "view": { "azimuth": 32, "elevation": 24 },
+  "spaces": [
+    { "id": "spot", "label": "המקום ליחידה", "fields": {
+      "width":  { "label": "רוחב פנוי (מ\"מ)", "value": 1000 },
+      "depth":  { "label": "עומק פנוי (מ\"מ)", "value": 500 },
+      "height": { "label": "גובה פנוי (מ\"מ)", "value": 2000 }
+    }}
+  ],
+  "profiles": {
+    "post":  { "label": "עמודים",      "t": 45, "w": 70 },
+    "rail":  { "label": "קורות המדפים", "t": 45, "w": 70 },
+    "board": { "label": "קרשי המדפים", "t": 22, "w": 95 }
+  },
+  "params": [
+    { "id": "W", "label": "רוחב", "value": 900, "min": 400, "max": 2400, "step": 10, "fit": true, "fitStage": 1, "suggest": "snap(min(2400, spot_width - 20), 10)", "suggestNote": "הרוחב הפנוי פחות 20 מ\"מ" },
+    { "id": "D", "label": "עומק", "value": 400, "min": 250, "max": 800, "step": 10, "fit": true, "fitStage": 1, "suggest": "snap(min(800, spot_depth - 20), 10)", "suggestNote": "העומק הפנוי פחות 20 מ\"מ" },
+    { "id": "H", "label": "גובה", "value": 1800, "min": 500, "max": 2400, "step": 10, "fit": true, "fitStage": 1, "suggest": "snap(min(2400, spot_height - 50), 10)", "suggestNote": "הגובה הפנוי פחות 50 מ\"מ" },
+    { "id": "nShelves", "label": "מספר מדפים (כולל העליון)", "value": 4, "min": 2, "max": 8, "step": 1, "fit": true, "fitStage": 2 },
+    { "id": "gap", "label": "רווח מינימלי בין קרשים", "value": 10, "min": 0, "max": 30, "step": 1 },
+    { "id": "bottom", "label": "גובה המדף התחתון מהרצפה", "value": 100, "min": 0, "max": 500, "step": 10 }
+  ],
+  "derived": {
+    "innerW": "W - 2*post_w",
+    "shelfT": "rail_w + board_t",
+    "pitch": "nShelves > 1 ? (H - bottom - shelfT) / (nShelves - 1) : 0",
+    "nBoards": "floor((innerW + gap) / (board_w + gap))",
+    "gapB": "nBoards > 1 ? (innerW - nBoards*board_w) / (nBoards - 1) : 0"
+  },
+  "dims": [
+    { "label": "מרווח", "value": "pitch", "from": ["-80", "D", "bottom + shelfT"], "to": ["-80", "D", "bottom + shelfT + pitch"] }
+  ],
+  "parts": [
+    { "id": "post", "name": "עמוד", "profile": "post", "count": 4,
+      "at": ["(i % 2)*(W - post_w)", "floor(i/2)*(D - post_t)", "0"], "size": ["post_w", "post_t", "H"] },
+    { "id": "rail", "name": "קורת מדף", "profile": "rail", "count": "2*nShelves",
+      "at": ["post_w", "(i % 2)*(D - rail_t)", "bottom + floor(i/2)*pitch"], "size": ["innerW", "rail_t", "rail_w"] },
+    { "id": "board", "name": "קרש מדף", "profile": "board", "count": "nShelves*nBoards",
+      "at": ["post_w + (i % nBoards)*(board_w + gapB)", "0", "bottom + floor(i/nBoards)*pitch + rail_w"], "size": ["board_w", "D", "board_t"] }
+  ],
+  "joints": [
+    { "a": "rail", "b": "post", "through": "post", "count": 2 },
+    { "a": "board", "b": "rail", "count": 1 },
+    { "a": "board", "b": "post", "method": "none" },
+    { "a": "board", "b": "board", "method": "none" }
+  ],
+  "steps": [
+    { "title": "חיתוך וקידוח", "text": "חתוך את כל החלקים לפי תוכנית החיתוך וקדח לפי שרטוטי החלקים.", "add": [] },
+    { "title": "שתי המסגרות הצדדיות", "text": "הנח שני עמודים על הרצפה, והברג דרכם את קורות המדף של אותו צד (הקדמיות לשני העמודים הקדמיים, האחוריות לאחוריים). חזור לצד השני.", "add": ["post", "rail"], "tip": "סמן את גובה כל קורה על שני העמודים יחד, בעזרת זווית, לפני ההברגה." },
+    { "title": "הקרשים", "text": "העמד את המסגרת והנח את קרשי המדפים על הקורות, מהמדף התחתון למעלה, עם רווח אחיד. הברג כל קרש לשתי הקורות.", "add": ["board"] },
+    { "title": "גימור", "text": "לטש, מרח שמן או צבע, והצמד לקיר בזווית אם היחידה גבוהה.", "add": [] }
+  ]
+}

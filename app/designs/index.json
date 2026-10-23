@@ -1,0 +1,37 @@
+[
+  {
+    "id": "potting-bench",
+    "name": "שולחן גינה עם קיר כלים ומדף",
+    "category": "גינה"
+  },
+  {
+    "id": "irrigation-cabinet",
+    "name": "ארון השקיה (שלבים)",
+    "category": "גינה"
+  },
+  {
+    "id": "rolling-table",
+    "name": "שולחן עבודה על גלגלים",
+    "category": "סדנה"
+  },
+  {
+    "id": "planter-box",
+    "name": "אדנית עץ",
+    "category": "גינה"
+  },
+  {
+    "id": "shelf-unit",
+    "name": "יחידת מדפים",
+    "category": "אחסון"
+  },
+  {
+    "id": "pergola-leanto",
+    "name": "פרגולה צמודה לקיר",
+    "category": "גינה"
+  },
+  {
+    "id": "crosscut-jig",
+    "name": "התקן חיתוך ישר למסור עגול",
+    "category": "כלי עזר"
+  }
+]

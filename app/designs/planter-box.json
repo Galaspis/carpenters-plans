@@ -1,0 +1,67 @@
+{
+  "id": "planter-box",
+  "name": "אדנית עץ",
+  "description": "אדנית מלבנית מקרשים אופקיים על ארבעה עמודי פינה, עם תחתית מקרשים מרווחים לניקוז.",
+  "category": "גינה",
+  "units": "mm",
+  "view": { "azimuth": 35, "elevation": 30 },
+  "spaces": [
+    { "id": "spot", "label": "המקום של האדנית", "fields": {
+      "width": { "label": "רוחב פנוי (מ\"מ)", "value": 1200 },
+      "depth": { "label": "עומק פנוי (מ\"מ)", "value": 500 }
+    }}
+  ],
+  "profiles": {
+    "post":  { "label": "עמודי פינה",  "t": 45, "w": 70 },
+    "board": { "label": "קרשי דפנות ותחתית", "t": 18, "w": 140 }
+  },
+  "params": [
+    { "id": "W", "label": "אורך", "value": 1000, "min": 400, "max": 2400, "step": 10, "suggest": "snap(min(2400, spot_width - 50), 10)", "suggestNote": "הרוחב הפנוי פחות 50 מ\"מ", "fit": true },
+    { "id": "D", "label": "רוחב", "value": 400,  "min": 250, "max": 1000, "step": 10, "suggest": "snap(min(1000, spot_depth - 50), 10)", "suggestNote": "העומק הפנוי פחות 50 מ\"מ", "fit": true },
+    { "id": "rows", "label": "מספר שורות קרשים בגובה", "value": 3, "min": 1, "max": 6, "step": 1, "fit": true },
+    { "id": "gap", "label": "רווח בין קרשי התחתית", "value": 10, "min": 5, "max": 30, "step": 1 },
+    { "id": "legExt", "label": "הארכת העמודים מתחת לאדנית (רגליים)", "value": 40, "min": 0, "max": 300, "step": 10 }
+  ],
+  "derived": {
+    "H": "rows * board_w",
+    "postH": "H + legExt",
+    "innerW": "W - 2*board_t",
+    "innerD": "D - 2*board_t",
+    "nBottom": "floor((innerD + gap) / (board_w + gap))",
+    "bottomStart": "board_t + (innerD - (nBottom*board_w + (nBottom-1)*gap)) / 2"
+  },
+  "parts": [
+    { "id": "post", "name": "עמוד פינה", "profile": "post", "count": 4,
+      "at": ["board_t + (i % 2)*(innerW - post_t)", "board_t + floor(i/2)*(innerD - post_w)", "0"], "size": ["post_t", "post_w", "postH"] },
+    { "id": "longBoard", "name": "קרש דופן ארוכה", "profile": "board", "count": "2*rows",
+      "at": ["0", "(i % 2)*(D - board_t)", "legExt + floor(i/2)*board_w"], "size": ["W", "board_t", "board_w"] },
+    { "id": "shortBoard", "name": "קרש דופן קצרה", "profile": "board", "count": "2*rows",
+      "at": ["(i % 2)*(W - board_t)", "board_t", "legExt + floor(i/2)*board_w"], "size": ["board_t", "innerD", "board_w"] },
+    { "id": "bottomRail", "name": "תומך תחתית", "profile": "post", "count": 2,
+      "at": ["board_t + post_t + i*(innerW - 3*post_t)", "board_t", "legExt"], "size": ["post_t", "innerD", "post_w"] },
+    { "id": "bottomBoard", "name": "קרש תחתית", "profile": "board", "count": "nBottom",
+      "at": ["board_t + post_t", "bottomStart + i*(board_w + gap)", "legExt + post_w"], "size": ["innerW - 2*post_t", "board_w", "board_t"] }
+  ],
+  "joints": [
+    { "a": "longBoard", "b": "post", "through": "longBoard", "count": 2 },
+    { "a": "shortBoard", "b": "post", "through": "shortBoard", "count": 2 },
+    { "a": "longBoard", "b": "longBoard", "method": "none" },
+    { "a": "shortBoard", "b": "shortBoard", "method": "none" },
+    { "a": "longBoard", "b": "shortBoard", "method": "none" },
+    { "a": "bottomRail", "b": "longBoard", "through": "longBoard" },
+    { "a": "bottomRail", "b": "post", "through": "bottomRail", "count": 2 },
+    { "a": "bottomBoard", "b": "bottomRail", "count": 1 },
+    { "a": "bottomBoard", "b": "shortBoard", "method": "none" },
+    { "a": "bottomBoard", "b": "longBoard", "method": "none" }
+  ],
+  "extras": [
+    { "name": "יריעת בד גיאוטכני לציפוי פנימי", "qty": 1, "price": 30, "icon": "oil" }
+  ],
+  "steps": [
+    { "title": "חיתוך וקידוח", "text": "חתוך את כל החלקים וקדח לפי השרטוטים.", "add": [] },
+    { "title": "דפנות ארוכות", "text": "הנח שני עמודי פינה על הרצפה והברג עליהם את קרשי הדופן הארוכה, שורה אחר שורה, צמודים זה לזה. חזור לדופן השנייה.", "add": ["post", "longBoard"] },
+    { "title": "דפנות קצרות", "text": "העמד את שתי הדפנות הארוכות והברג את קרשי הדופן הקצרה לעמודים ביניהן.", "add": ["shortBoard"] },
+    { "title": "תחתית", "text": "הברג את תומכי התחתית דרך הדפנות הארוכות, והנח עליהם את קרשי התחתית עם רווח לניקוז.", "add": ["bottomRail", "bottomBoard"] },
+    { "title": "גימור", "text": "מרח שמן לעץ חיצוני ורפד את פנים האדנית בבד גיאוטכני לפני מילוי האדמה.", "add": [] }
+  ]
+}

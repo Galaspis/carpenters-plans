@@ -1,0 +1,210 @@
+{
+  "_note": "מחירים לדוגמה בלבד - החלף במחירים של מחסן העצים הקרוב אליך. t/w במ\"מ (t = עובי, w = רוחב), אורכים במ\"מ, מחיר למטר רץ.",
+  "currency": "₪",
+  "kerf": 3,
+  "endTrim": 10,
+  "lumber": [
+    {
+      "id": "pine_70x70",
+      "name": "קורת אורן 70×70 (מטופל)",
+      "t": 70,
+      "w": 70,
+      "lengths": [
+        2400,
+        3000,
+        3600
+      ],
+      "pricePerMeter": 22
+    },
+    {
+      "id": "pine_45x95",
+      "name": "קורת אורן לבנייה",
+      "t": 45,
+      "w": 95,
+      "lengths": [
+        2400,
+        3000,
+        3600,
+        4200
+      ],
+      "pricePerMeter": 14
+    },
+    {
+      "id": "pine_45x70",
+      "name": "קורת אורן לבנייה",
+      "t": 45,
+      "w": 70,
+      "lengths": [
+        2400,
+        3000,
+        3600,
+        4200
+      ],
+      "pricePerMeter": 11
+    },
+    {
+      "id": "pine_22x95",
+      "name": "קרש דק אורן",
+      "t": 22,
+      "w": 95,
+      "lengths": [
+        2400,
+        3000,
+        3600
+      ],
+      "pricePerMeter": 8
+    },
+    {
+      "id": "pine_22x120",
+      "name": "קרש דק אורן",
+      "t": 22,
+      "w": 120,
+      "lengths": [
+        2400,
+        3000,
+        3600
+      ],
+      "pricePerMeter": 10
+    },
+    {
+      "id": "pine_18x95",
+      "name": "קרש חיפוי אורן",
+      "t": 18,
+      "w": 95,
+      "lengths": [
+        2400,
+        3000
+      ],
+      "pricePerMeter": 6
+    },
+    {
+      "id": "pine_18x140",
+      "name": "קרש אורן",
+      "t": 18,
+      "w": 140,
+      "lengths": [
+        2400,
+        3000
+      ],
+      "pricePerMeter": 9
+    },
+    {
+      "id": "pine_20x45",
+      "name": "שלב אורן צר",
+      "t": 20,
+      "w": 45,
+      "lengths": [
+        2400,
+        3000
+      ],
+      "pricePerMeter": 4
+    },
+    {
+      "id": "pine_90x90",
+      "name": "עמוד אורן 90×90 (מטופל)",
+      "t": 90,
+      "w": 90,
+      "lengths": [
+        2400,
+        3000,
+        3600
+      ],
+      "pricePerMeter": 34
+    },
+    {
+      "id": "pine_45x145",
+      "name": "קורת אורן לבנייה",
+      "t": 45,
+      "w": 145,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800,
+        5100
+      ],
+      "pricePerMeter": 22
+    },
+    {
+      "id": "pine_30x70",
+      "name": "קורת אורן לבנייה",
+      "t": 30,
+      "w": 70,
+      "lengths": [
+        2400,
+        3300,
+        4200
+      ],
+      "pricePerMeter": 8
+    },
+    {
+      "id": "pine_20x40",
+      "name": "שלב אורן צר",
+      "t": 20,
+      "w": 40,
+      "lengths": [
+        2400,
+        3300
+      ],
+      "pricePerMeter": 4
+    }
+  ],
+  "hardware": {
+    "screws": [
+      {
+        "d": 4,
+        "len": 40,
+        "pack": 100,
+        "price": 25
+      },
+      {
+        "d": 4,
+        "len": 45,
+        "pack": 100,
+        "price": 27
+      },
+      {
+        "d": 4,
+        "len": 50,
+        "pack": 100,
+        "price": 30
+      },
+      {
+        "d": 5,
+        "len": 60,
+        "pack": 100,
+        "price": 40
+      },
+      {
+        "d": 5,
+        "len": 70,
+        "pack": 100,
+        "price": 45
+      },
+      {
+        "d": 5,
+        "len": 80,
+        "pack": 50,
+        "price": 30
+      },
+      {
+        "d": 5,
+        "len": 90,
+        "pack": 50,
+        "price": 34
+      },
+      {
+        "d": 5,
+        "len": 100,
+        "pack": 50,
+        "price": 38
+      }
+    ],
+    "screwFallbackPricePerUnit": 0.6,
+    "finishPricePerLiter": 60,
+    "finishCoverageM2PerLiter": 10,
+    "finishCoats": 2,
+    "gluePrice": 25,
+    "sandpaperPrice": 20
+  }
+}

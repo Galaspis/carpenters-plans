@@ -1,0 +1,532 @@
+{
+  "id": "potting-bench",
+  "name": "שולחן גינה עם קיר כלים ומדף",
+  "description": "שולחן עבודה לגינה עם מדף אחסון תחתון, קיר שלבים מאחור לתליית כלים ומדף עליון לעציצים. לפי התמונה שהועלתה.",
+  "category": "גינה",
+  "units": "mm",
+  "view": {
+    "azimuth": 32,
+    "elevation": 26
+  },
+  "spaces": [
+    {
+      "id": "wall",
+      "label": "המקום שבו השולחן יעמוד",
+      "fields": {
+        "width": {
+          "label": "רוחב פנוי (מ\"מ)",
+          "value": 1800
+        },
+        "depth": {
+          "label": "עומק פנוי (מ\"מ)",
+          "value": 700
+        },
+        "height": {
+          "label": "גובה מקסימלי (מ\"מ)",
+          "value": 1900
+        },
+        "reserve": {
+          "label": "רוחב שמור לרהיט אחר (מ\"מ)",
+          "value": 0
+        }
+      }
+    }
+  ],
+  "profiles": {
+    "post": {
+      "label": "רגליים / עמודים",
+      "t": 70,
+      "w": 70
+    },
+    "rail": {
+      "label": "מסגרת וקורות",
+      "t": 45,
+      "w": 95
+    },
+    "board": {
+      "label": "קרשי משטח ומדפים",
+      "t": 22,
+      "w": 95
+    },
+    "slat": {
+      "label": "שלבי הקיר האחורי",
+      "t": 18,
+      "w": 95
+    }
+  },
+  "params": [
+    {
+      "id": "W",
+      "label": "רוחב כללי",
+      "value": 1500,
+      "min": 900,
+      "max": 2400,
+      "step": 10,
+      "suggest": "snap(min(2400, wall_width - wall_reserve - 100), 10)",
+      "suggestNote": "הרוחב הפנוי פחות הרוחב השמור פחות 100 מ\"מ מרווח (עד 2400)",
+      "fit": true,
+      "fitStage": 1
+    },
+    {
+      "id": "D",
+      "label": "עומק המשטח",
+      "value": 600,
+      "min": 400,
+      "max": 900,
+      "step": 10,
+      "suggest": "min(700, wall_depth - 50)",
+      "suggestNote": "העומק הפנוי פחות 50 מ\"מ מרווח מהקיר (עד 700)",
+      "fit": true,
+      "fitStage": 1
+    },
+    {
+      "id": "H",
+      "label": "גובה משטח העבודה",
+      "value": 900,
+      "min": 750,
+      "max": 1000,
+      "step": 10
+    },
+    {
+      "id": "HB",
+      "label": "גובה הקיר מעל המשטח (0 = בלי קיר)",
+      "value": 800,
+      "min": 0,
+      "max": 1200,
+      "step": 10,
+      "suggest": "min(1000, wall_height - H - 150)",
+      "suggestNote": "הגובה המקסימלי פחות גובה המשטח פחות 150 מ\"מ (עד 1000); מוגבל גם באורך העמודים שיש",
+      "fit": true,
+      "fitStage": 2
+    },
+    {
+      "id": "nSlats",
+      "label": "מספר שלבים בקיר (0 = רק עמודים)",
+      "value": 6,
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "fit": true,
+      "fitStage": 2
+    },
+    {
+      "id": "shelf",
+      "label": "מדף תחתון (1 = כן, 0 = לא)",
+      "value": 1,
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "fit": true,
+      "fitStage": 2
+    },
+    {
+      "id": "shelfH",
+      "label": "גובה המדף התחתון מהרצפה",
+      "value": 250,
+      "min": 100,
+      "max": 500,
+      "step": 10
+    },
+    {
+      "id": "topShelf",
+      "label": "מדף עליון (1 = כן, 0 = לא)",
+      "value": 1,
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "fit": true,
+      "fitStage": 2
+    },
+    {
+      "id": "gap",
+      "label": "רווח מינימלי בין קרשים",
+      "value": 8,
+      "min": 0,
+      "max": 20,
+      "step": 1
+    },
+    {
+      "id": "ov",
+      "label": "בליטת המשטח מכל צד",
+      "value": 30,
+      "min": 0,
+      "max": 100,
+      "step": 5
+    }
+  ],
+  "derived": {
+    "wall": "HB > 0 ? 1 : 0",
+    "innerW": "W - 2*ov - 2*post_t",
+    "railLen": "innerW",
+    "sideRailLen": "D - 2*ov - 2*post_t",
+    "nTop": "floor((D + gap) / (board_w + gap))",
+    "gapTop": "nTop > 1 ? (D - nTop*board_w) / (nTop - 1) : 0",
+    "topPitch": "board_w + gapTop",
+    "topStart": "0",
+    "shelfInner": "D - 2*ov - 2*post_t",
+    "nShelf": "floor((shelfInner + gap) / (board_w + gap))",
+    "gapShelf": "nShelf > 1 ? (shelfInner - nShelf*board_w) / (nShelf - 1) : 0",
+    "shelfStart": "ov + post_t",
+    "nSlat": "wall ? min(nSlats, floor((HB - 60 + gap) / (slat_w + gap))) : 0",
+    "slatPitch": "slat_w + gap",
+    "backPostH": "wall ? H + HB : H - board_t",
+    "backPostY": "D - ov - post_t",
+    "topShelfD": "200",
+    "nBearer": "shelf * (W > 1200 ? 3 : 2)",
+    "slatTop": "backPostH - (topShelf ? rail_w + board_t + 20 : 20)"
+  },
+  "dims": [
+    {
+      "label": "משטח",
+      "value": "H",
+      "from": [
+        "-90",
+        "ov",
+        "0"
+      ],
+      "to": [
+        "-90",
+        "ov",
+        "H"
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "frontLeg",
+      "name": "רגל קדמית",
+      "profile": "post",
+      "count": 2,
+      "at": [
+        "ov + i*(W - 2*ov - post_t)",
+        "ov",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "H - board_t"
+      ]
+    },
+    {
+      "id": "backPost",
+      "name": "עמוד אחורי",
+      "profile": "post",
+      "count": 2,
+      "at": [
+        "ov + i*(W - 2*ov - post_t)",
+        "backPostY",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "backPostH"
+      ]
+    },
+    {
+      "id": "longRail",
+      "name": "קורה ארוכה עליונה",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "ov + post_t",
+        "ov + i*(backPostY - ov)",
+        "H - board_t - rail_w"
+      ],
+      "size": [
+        "railLen",
+        "rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "sideRail",
+      "name": "קורה צדדית עליונה",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "ov + i*(W - 2*ov - post_t) + (post_t - rail_t)/2",
+        "ov + post_t",
+        "H - board_t - rail_w"
+      ],
+      "size": [
+        "rail_t",
+        "sideRailLen",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "midRail",
+      "name": "תומך אמצעי למשטח",
+      "profile": "rail",
+      "count": "W > 1200 ? 1 : 0",
+      "at": [
+        "W/2 - rail_t/2",
+        "ov + rail_t",
+        "H - board_t - rail_w"
+      ],
+      "size": [
+        "rail_t",
+        "backPostY - ov - rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "longShelfRail",
+      "name": "קורה ארוכה למדף",
+      "profile": "rail",
+      "count": "2*shelf",
+      "at": [
+        "ov + post_t",
+        "ov + i*(backPostY - ov) + (post_t - rail_t)/2",
+        "shelfH - board_t - rail_w"
+      ],
+      "size": [
+        "railLen",
+        "rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "shelfBearer",
+      "name": "תומך מדף",
+      "profile": "rail",
+      "count": "nBearer",
+      "at": [
+        "ov + post_t + i*(railLen - rail_t)/(nBearer - 1)",
+        "ov + (post_t - rail_t)/2 + rail_t",
+        "shelfH - board_t - rail_w"
+      ],
+      "size": [
+        "rail_t",
+        "backPostY - ov - rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "topBoard",
+      "name": "קרש משטח",
+      "profile": "board",
+      "count": "nTop",
+      "at": [
+        "(wall && topStart + i*topPitch + board_w > backPostY) ? ov + post_t : 0",
+        "topStart + i*topPitch",
+        "H - board_t"
+      ],
+      "size": [
+        "(wall && topStart + i*topPitch + board_w > backPostY) ? innerW : W",
+        "board_w",
+        "board_t"
+      ]
+    },
+    {
+      "id": "shelfBoard",
+      "name": "קרש מדף תחתון",
+      "profile": "board",
+      "count": "shelf * nShelf",
+      "at": [
+        "ov + post_t",
+        "shelfStart + i*(board_w + gapShelf)",
+        "shelfH - board_t"
+      ],
+      "size": [
+        "railLen",
+        "board_w",
+        "board_t"
+      ]
+    },
+    {
+      "id": "backSlat",
+      "name": "שלב קיר אחורי",
+      "profile": "slat",
+      "count": "nSlat",
+      "at": [
+        "ov",
+        "backPostY + post_t",
+        "slatTop - slat_w - i*slatPitch"
+      ],
+      "size": [
+        "W - 2*ov",
+        "slat_t",
+        "slat_w"
+      ]
+    },
+    {
+      "id": "topShelfBracket",
+      "name": "תומך מדף עליון",
+      "profile": "rail",
+      "count": "2*topShelf*wall",
+      "at": [
+        "ov + post_t + i*(innerW - rail_t)",
+        "backPostY - topShelfD",
+        "backPostH - rail_w - board_t"
+      ],
+      "size": [
+        "rail_t",
+        "topShelfD",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "topShelfBoard",
+      "name": "קרש מדף עליון",
+      "profile": "board",
+      "count": "2*topShelf*wall",
+      "at": [
+        "ov + post_t",
+        "backPostY - topShelfD + 10 + i*(board_w + gap)",
+        "backPostH - board_t"
+      ],
+      "size": [
+        "innerW",
+        "board_w",
+        "board_t"
+      ]
+    }
+  ],
+  "joints": [
+    {
+      "a": "backSlat",
+      "b": "backPost",
+      "through": "backSlat",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "longRail",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "sideRail",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "midRail",
+      "count": 1
+    },
+    {
+      "a": "topBoard",
+      "b": "frontLeg",
+      "method": "none"
+    },
+    {
+      "a": "topBoard",
+      "b": "backPost",
+      "method": "none"
+    },
+    {
+      "a": "shelfBoard",
+      "b": "longShelfRail",
+      "method": "none"
+    },
+    {
+      "a": "shelfBoard",
+      "b": "shelfBearer",
+      "count": 1
+    },
+    {
+      "a": "topShelfBoard",
+      "b": "topShelfBracket",
+      "count": 1
+    },
+    {
+      "a": "topShelfBoard",
+      "b": "backPost",
+      "method": "none"
+    },
+    {
+      "a": "sideRail",
+      "b": "longRail",
+      "method": "none"
+    },
+    {
+      "a": "midRail",
+      "b": "longRail",
+      "through": "longRail"
+    },
+    {
+      "a": "shelfBearer",
+      "b": "longShelfRail",
+      "through": "longShelfRail"
+    }
+  ],
+  "extras": [
+    {
+      "name": "ווים לתליית כלים",
+      "qty": 8,
+      "price": 6,
+      "icon": "hook"
+    }
+  ],
+  "steps": [
+    {
+      "title": "חיתוך וקידוח כל החלקים",
+      "text": "חתוך כל חלק לאורכו לפי תוכנית החיתוך. קדח את החורים לפי שרטוט החלקים. לטש את כל הפאות (נייר 80 ואז 120).",
+      "add": []
+    },
+    {
+      "title": "בניית שתי מסגרות הצד",
+      "text": "הנח רגל קדמית ועמוד אחורי על הרצפה. הברג את הקורה הצדדית העליונה ביניהם, בקו אחד עם ראש הרגל הקדמית. חזור על זה לצד השני.",
+      "add": [
+        "frontLeg",
+        "backPost",
+        "sideRail"
+      ],
+      "tip": "השתמש בזווית 90° — מסגרות הצד קובעות אם השולחן יעמוד ישר."
+    },
+    {
+      "title": "חיבור הצדדים בקורות הארוכות",
+      "text": "העמד את שתי מסגרות הצד. הברג את שתי הקורות הארוכות העליונות ואת שתי קורות המדף ביניהן. בדוק שהאלכסונים שווים.",
+      "add": [
+        "longRail",
+        "longShelfRail"
+      ]
+    },
+    {
+      "title": "הוספת התומכים",
+      "text": "התקן את התומך האמצעי של המשטח ואת תומכי המדף בין הקורות הארוכות.",
+      "add": [
+        "midRail",
+        "shelfBearer"
+      ]
+    },
+    {
+      "title": "הנחת המדף התחתון",
+      "text": "הנח את קרשי המדף על התומכים עם הרווח המסומן, והברג.",
+      "add": [
+        "shelfBoard"
+      ]
+    },
+    {
+      "title": "הרכבת משטח העבודה",
+      "text": "הנח את קרשי המשטח, מהקדמי לאחורי. שמור על רווח אחיד בעזרת שבלונה. הברג כל קרש לקורות שמתחתיו.",
+      "add": [
+        "topBoard"
+      ],
+      "tip": "שקע (countersink) את החורים כדי שראשי הברגים יישבו מתחת לפני העץ."
+    },
+    {
+      "title": "בניית קיר הכלים",
+      "text": "הברג את השלבים לרוחב העמודים האחוריים, מלמטה למעלה, עם רווח אחיד. ברווחים תולים ווים.",
+      "add": [
+        "backSlat"
+      ]
+    },
+    {
+      "title": "המדף העליון",
+      "text": "הברג את התומכים לצד הפנימי של העמודים האחוריים, ואז קבע את קרשי המדף מעליהם.",
+      "add": [
+        "topShelfBracket",
+        "topShelfBoard"
+      ]
+    },
+    {
+      "title": "גימור",
+      "text": "עגל פינות חדות ומרח שתי שכבות שמן לעץ חיצוני. הוסף ווים לרווחי השלבים.",
+      "add": []
+    }
+  ]
+}

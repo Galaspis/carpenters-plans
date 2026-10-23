@@ -1,0 +1,42 @@
+name: Deploy woody.gallab.top
+# Push to master → the server. Needs repo secrets VPS_SSH_KEY and VPS_HOST.
+# (release.ps1 still bumps the version stamp and pushes; the push triggers this.)
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+concurrency: deploy
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checks
+        run: |
+          for f in app/js/*.js; do node --check "$f"; done
+          QUIET=1 node app/test/run.mjs | tail -1
+      - name: Join the private network (Tailscale)
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: SSH setup
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Sync app
+        env: { H: "${{ secrets.VPS_HOST }}" }
+        run: rsync -az --delete --exclude test --exclude server.mjs --exclude README-OPEN-ME.txt app/ deploy@$H:/srv/woody/site/
+      - name: Caddy site
+        env: { H: "${{ secrets.VPS_HOST }}" }
+        run: |
+          scp -q deploy/woody.caddy deploy@$H:/tmp/woody.caddy
+          ssh deploy@$H 'sudo /usr/local/bin/caddy-site-install woody'
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -m 15 -w "%{http_code}" https://woody.gallab.top/)
+          echo "woody.gallab.top → $code (401 = login gate, expected)"
+          test "$code" = "401"

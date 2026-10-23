@@ -1,0 +1,409 @@
+{
+  "id": "pergola-leanto",
+  "name": "פרגולה צמודה לקיר עם גג פוליקרבונט",
+  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית.",
+  "category": "גינה",
+  "units": "mm",
+  "view": {
+    "azimuth": 30,
+    "elevation": 22
+  },
+  "spaces": [
+    {
+      "id": "wall",
+      "label": "הקיר שעליו נשענת הפרגולה",
+      "fields": {
+        "width": {
+          "label": "אורך הקיר הפנוי (מ\"מ)",
+          "value": 4200
+        },
+        "depth": {
+          "label": "עומק פנוי מהקיר החוצה (מ\"מ)",
+          "value": 2800
+        },
+        "height": {
+          "label": "גובה מקסימלי בקיר, מתחת לחלון/גג (מ\"מ)",
+          "value": 2800
+        }
+      }
+    }
+  ],
+  "profiles": {
+    "post": {
+      "label": "עמודים",
+      "t": 90,
+      "w": 90
+    },
+    "beam": {
+      "label": "קורות (קיר, קדמית, רפטרים)",
+      "t": 45,
+      "w": 145
+    },
+    "purlin": {
+      "label": "מרישים לגג",
+      "t": 45,
+      "w": 70
+    },
+    "base": {
+      "label": "בסיסי עמוד (מתכת)",
+      "t": 3,
+      "w": 100,
+      "hardware": true
+    }
+  },
+  "params": [
+    {
+      "id": "W",
+      "label": "אורך לאורך הקיר",
+      "value": 4000,
+      "min": 1500,
+      "max": 7000,
+      "step": 50,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(7000, wall_width - 100), 50)",
+      "suggestNote": "אורך הקיר הפנוי פחות 100 מ\"מ"
+    },
+    {
+      "id": "D",
+      "label": "עומק (מהקיר החוצה)",
+      "value": 2500,
+      "min": 1200,
+      "max": 4000,
+      "step": 50,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(4000, wall_depth - 200), 50)",
+      "suggestNote": "העומק הפנוי פחות 200 מ\"מ"
+    },
+    {
+      "id": "H",
+      "label": "גובה חופשי מתחת לקורות (בקצה הקדמי)",
+      "value": 2300,
+      "min": 1900,
+      "max": 3000,
+      "step": 50,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(3000, wall_height - 125 - beam_w - purlin_t - 60), 50)",
+      "suggestNote": "הגובה בקיר פחות השיפוע (125), הקורה, המרישים ומרווח"
+    },
+    {
+      "id": "spacing",
+      "label": "מרחק בין רפטרים (מ\"מ)",
+      "value": 650,
+      "min": 400,
+      "max": 900,
+      "step": 50
+    },
+    {
+      "id": "pspacing",
+      "label": "מרחק בין מרישים (מ\"מ)",
+      "value": 600,
+      "min": 400,
+      "max": 1000,
+      "step": 50
+    },
+    {
+      "id": "overhang",
+      "label": "בליטת הרפטרים מעבר לקורה הקדמית",
+      "value": 200,
+      "min": 0,
+      "max": 500,
+      "step": 10
+    },
+    {
+      "id": "sideOver",
+      "label": "בליטת הקורות בצדדים מעבר לעמודים",
+      "value": 150,
+      "min": 0,
+      "max": 400,
+      "step": 10
+    }
+  ],
+  "derived": {
+    "nPosts": "W > 4500 ? 3 : 2",
+    "nR": "max(2, round((W - beam_t) / spacing) + 1)",
+    "rPitch": "nR > 1 ? (W - beam_t) / (nR - 1) : 0",
+    "rafterLen": "D - beam_t",
+    "nP": "max(2, floor((rafterLen - overhang - 2*purlin_w) / pspacing) + 2)",
+    "pPitch": "nP > 1 ? (rafterLen - overhang - purlin_w) / (nP - 1) : 0",
+    "beamZ": "H",
+    "postH": "H - beam_w",
+    "postX0": "sideOver",
+    "postStep": "nPosts > 1 ? (W - 2*sideOver - post_t) / (nPosts - 1) : 0",
+    "sheets": "ceil(W / 1050)",
+    "sheetLen": "ceil(rafterLen / 100) * 100 + 100"
+  },
+  "dims": [
+    {
+      "label": "גובה חופשי",
+      "value": "H",
+      "from": [
+        "W + 120",
+        "overhang",
+        "0"
+      ],
+      "to": [
+        "W + 120",
+        "overhang",
+        "H"
+      ]
+    },
+    {
+      "label": "עומק",
+      "value": "D",
+      "from": [
+        "-120",
+        "0",
+        "0"
+      ],
+      "to": [
+        "-120",
+        "D",
+        "0"
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "base",
+      "name": "בסיס עמוד מתכת",
+      "profile": "base",
+      "count": "nPosts",
+      "at": [
+        "postX0 + i*postStep - 5",
+        "overhang - 5",
+        "-3"
+      ],
+      "size": [
+        "post_t + 10",
+        "post_t + 10",
+        "3"
+      ]
+    },
+    {
+      "id": "post",
+      "name": "עמוד",
+      "profile": "post",
+      "count": "nPosts",
+      "at": [
+        "postX0 + i*postStep",
+        "overhang",
+        "0"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "postH"
+      ]
+    },
+    {
+      "id": "frontBeam",
+      "name": "קורה קדמית",
+      "profile": "beam",
+      "count": 1,
+      "at": [
+        "0",
+        "overhang",
+        "postH"
+      ],
+      "size": [
+        "W",
+        "beam_t",
+        "beam_w"
+      ]
+    },
+    {
+      "id": "ledger",
+      "name": "קורת קיר",
+      "profile": "beam",
+      "count": 1,
+      "at": [
+        "0",
+        "D - beam_t",
+        "beamZ"
+      ],
+      "size": [
+        "W",
+        "beam_t",
+        "beam_w"
+      ]
+    },
+    {
+      "id": "rafter",
+      "name": "רפטר (קורת גג)",
+      "profile": "beam",
+      "count": "nR",
+      "at": [
+        "i*rPitch",
+        "0",
+        "beamZ"
+      ],
+      "size": [
+        "beam_t",
+        "rafterLen",
+        "beam_w"
+      ]
+    },
+    {
+      "id": "purlin",
+      "name": "מריש",
+      "profile": "purlin",
+      "count": "nP",
+      "at": [
+        "0",
+        "overhang + i*pPitch",
+        "beamZ + beam_w"
+      ],
+      "size": [
+        "W",
+        "purlin_w",
+        "purlin_t"
+      ]
+    }
+  ],
+  "joints": [
+    {
+      "a": "post",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "frontBeam",
+      "b": "post",
+      "through": "frontBeam",
+      "count": 2
+    },
+    {
+      "a": "rafter",
+      "b": "frontBeam",
+      "through": "rafter",
+      "count": 2
+    },
+    {
+      "a": "rafter",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "purlin",
+      "b": "rafter",
+      "count": 1
+    },
+    {
+      "a": "purlin",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "purlin",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "rafter",
+      "b": "rafter",
+      "method": "none"
+    }
+  ],
+  "extras": [
+    {
+      "name": "תליית קורה מתכת (joist hanger) לרפטר 45×145",
+      "qty": "nR",
+      "price": 9,
+      "icon": "hook"
+    },
+    {
+      "name": "עוגני קיר/דיבלים כימיים M10 לקורת הקיר",
+      "qty": "ceil(W / 600) + 1",
+      "price": 8,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "ברגי עיגון לבסיסי העמודים (4 לבסיס)",
+      "qty": "4*nPosts",
+      "price": 4,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "יריעת פוליקרבונט תאי 10 מ\"מ, 1050 מ\"מ רוחב",
+      "qty": "sheets",
+      "price": 180,
+      "icon": "oil"
+    },
+    {
+      "name": "פרופיל H לחיבור יריעות",
+      "qty": "max(0, sheets - 1)",
+      "price": 25,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "ברגי גג עם דסקית אטימה (לפוליקרבונט)",
+      "qty": "sheets * nP * 2",
+      "price": 0.8,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "סרט סגירה אלומיניום/נושם לקצוות היריעות (מ׳)",
+      "qty": "ceil(2*W/1000)",
+      "price": 12,
+      "icon": "oil"
+    }
+  ],
+  "steps": [
+    {
+      "title": "חיתוך",
+      "text": "חתוך את העמודים, הקורות, הרפטרים והמרישים לפי תוכנית החיתוך. סמן על כל רפטר את מיקום המרישים.",
+      "add": []
+    },
+    {
+      "title": "בסיסים ועמודים",
+      "text": "סמן על הריצוף את מיקום העמודים (לפי המרחק מהקיר והמרחק ביניהם), קדח ועגן את בסיסי המתכת. העמד את העמודים בבסיסים, בדוק אנך, ותמוך זמנית בקרשים אלכסוניים.",
+      "add": [
+        "base",
+        "post"
+      ],
+      "tip": "בסיס מתכת מרים את העמוד מהריצוף — כך העץ לא שותה מים."
+    },
+    {
+      "title": "הקורה הקדמית",
+      "text": "הנח את הקורה הקדמית על ראשי העמודים והברג/הברג־בורג דרך הקורה אל כל עמוד. בדוק שהקורה אופקית.",
+      "add": [
+        "frontBeam"
+      ]
+    },
+    {
+      "title": "קורת הקיר",
+      "text": "סמן על הקיר קו אופקי בגובה של פני הקורה הקדמית + השיפוע (מומלץ 5%: כ-125 מ\"מ על 2.5 מ׳ עומק). קדח ועגן את קורת הקיר בעוגנים כימיים כל 60 ס\"מ.",
+      "add": [
+        "ledger"
+      ],
+      "tip": "השיפוע הוא מה שמנקז את הגג — אל תוותר עליו."
+    },
+    {
+      "title": "הרפטרים",
+      "text": "הברג תליית קורה לקיר (לקורת הקיר) מול כל רפטר. הנח כל רפטר בתלייה בצד הקיר ועל הקורה הקדמית, והברג דרכו אל הקורה הקדמית. הרפטרים משופעים — חתוך את הקצה בקיר בזווית קטנה כך שיישב בתלייה.",
+      "add": [
+        "rafter"
+      ]
+    },
+    {
+      "title": "המרישים",
+      "text": "הברג את המרישים לרוחב, על גבי הרפטרים, במרחק אחיד — הם מה שמחזיק את יריעות הפוליקרבונט.",
+      "add": [
+        "purlin"
+      ]
+    },
+    {
+      "title": "הגג",
+      "text": "הנח את יריעות הפוליקרבונט (התאים לכיוון השיפוע, הצד עם הגנת UV למעלה), חבר ביניהן בפרופיל H, סגור את הקצוות בסרט נושם, והברג למרישים בברגי גג עם דסקית אטימה — בלי להדק יותר מדי.",
+      "add": []
+    },
+    {
+      "title": "גימור",
+      "text": "הסר את התמיכות הזמניות, לטש קצוות, ומרח שמן/לזורה לעץ חיצוני על כל חלקי העץ.",
+      "add": []
+    }
+  ]
+}

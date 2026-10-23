@@ -1,0 +1,6 @@
+app/test/out/
+node_modules/
+.claude/
+*.log
+woody-brand-kit/
+.firebase/
