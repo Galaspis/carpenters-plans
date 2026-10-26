@@ -104,9 +104,9 @@
     },
     {
       "id": "shelfZ",
-      "label": "גובה המדף התחתון מהרצפה (מ\"מ)",
+      "label": "גובה המדף התחתון מהרצפה (מ\"מ) — הכי נמוך: גובה הגלגל + 100 (הקורה שמתחת למדף)",
       "value": 300,
-      "min": 150,
+      "min": 100,
       "max": 500,
       "step": 10
     },
@@ -143,7 +143,8 @@
     "px1": "W - rail_t - post_t",
     "py0": "rail_t",
     "py1": "D - rail_t - post_t",
-    "uprightH": "H + wall - frameZ"
+    "uprightH": "H + wall - frameZ",
+    "shelfTop": "max(shelfZ, wheelH + rail_w)"
   },
   "dims": [
     {
@@ -250,7 +251,7 @@
       "at": [
         "0",
         "i*(D - rail_t)",
-        "shelfZ - rail_w"
+        "shelfTop - rail_w"
       ],
       "size": [
         "W",
@@ -266,7 +267,7 @@
       "at": [
         "i*(W - rail_t)",
         "rail_t",
-        "shelfZ - rail_w"
+        "shelfTop - rail_w"
       ],
       "size": [
         "rail_t",
@@ -298,7 +299,7 @@
       "at": [
         "rail_t + post_t",
         "rail_t + i*(board_w + gapShelf)",
-        "shelfZ"
+        "shelfTop"
       ],
       "size": [
         "innerW - 2*post_t",
