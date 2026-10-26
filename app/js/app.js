@@ -268,6 +268,12 @@ const TEMPLATES = [
     features: [{ param: 'nShelves', label: 'מספר מדפים', type: 'number', min: 2, max: 8 }] },
   { id: 'pergola', icon: '🏡', name: 'פרגולה צמודה לקיר', desc: 'קורת קיר, עמודים קדמיים על בסיסי מתכת, רפטרים ומרישים, גג פוליקרבונט שקוף.', base: 'pergola-leanto',
     features: [{ param: 'spacing', label: 'מרחק בין רפטרים (מ"מ)', type: 'number', min: 400, max: 900 }] },
+  { id: 'workbench', icon: '🛠️', name: 'שולחן עבודה נייד', desc: 'שולחן עבודה על גלגלים לגינה: מסגרות 50×100 על עמודים, משטח ומדף מקרשים עם ניקוז, קיר כלים נמוך מאחור.', base: 'garden-workbench',
+    features: [
+      { param: 'shelf', label: 'מדף תחתון', type: 'bool', on: 1, off: 0 },
+      { param: 'wall', label: 'קיר כלים מאחור (ווים)', type: 'bool', on: 350, off: 0 },
+      { param: 'wheelH', label: 'גובה הגלגל כולל התושבת (מ"מ)', type: 'number', min: 60, max: 200 },
+    ] },
   { id: 'jig', icon: '📐', name: 'התקן חיתוך למסור עגול', desc: 'מסילת T לחיתוך ישר וניצב: בסיס, סרגל למסור וווו שנצמד לקרש. נמדד לפי המסור שלך.', base: 'crosscut-jig',
     features: [
       { param: 'A', label: 'המסור: מהלהב לקצה הבסיס בצד הרחב (מ"מ)', type: 'number', min: 30, max: 200 },

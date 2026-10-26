@@ -1,0 +1,552 @@
+{
+  "id": "garden-workbench",
+  "name": "שולחן עבודה נייד לגינה",
+  "description": "שולחן עבודה לחוץ על גלגלים: ארבעה עמודים, מסגרת עליונה מקורות 50×100 עם קורת אמצע, משטח מקרשי 30×70 עם מרווחי ניקוז, מדף תחתון, וקיר כלים נמוך מאחור על העמודים האחוריים המוארכים — עם ווים לתליית הכלים בזמן העבודה. בנייה פשוטה: הכל ברגים, בלי חיבורים מורכבים.",
+  "category": "סדנה",
+  "units": "mm",
+  "view": {
+    "azimuth": 32,
+    "elevation": 22
+  },
+  "spaces": [
+    {
+      "id": "spot",
+      "label": "המקום שבו השולחן יעמוד בדרך כלל",
+      "fields": {
+        "width": {
+          "label": "אורך פנוי (מ\"מ)",
+          "value": 1800
+        },
+        "depth": {
+          "label": "עומק פנוי (מ\"מ)",
+          "value": 900
+        },
+        "height": {
+          "label": "גובה פנוי (מ\"מ)",
+          "value": 2000
+        }
+      }
+    }
+  ],
+  "profiles": {
+    "post": {
+      "label": "עמודים",
+      "t": 66,
+      "w": 66
+    },
+    "rail": {
+      "label": "מסגרות (עליונה ותחתונה)",
+      "t": 50,
+      "w": 100
+    },
+    "board": {
+      "label": "משטח, מדף וקיר הכלים",
+      "t": 30,
+      "w": 70
+    },
+    "caster": {
+      "label": "גלגלים (מתכת)",
+      "t": 100,
+      "w": 100,
+      "hardware": true
+    }
+  },
+  "params": [
+    {
+      "id": "W",
+      "label": "אורך",
+      "value": 1600,
+      "min": 900,
+      "max": 2400,
+      "step": 50,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(2400, spot_width - 100), 50)",
+      "suggestNote": "האורך הפנוי פחות 100"
+    },
+    {
+      "id": "D",
+      "label": "עומק",
+      "value": 700,
+      "min": 450,
+      "max": 900,
+      "step": 50,
+      "fit": true,
+      "fitStage": 1,
+      "suggest": "snap(min(900, spot_depth - 100), 50)",
+      "suggestNote": "העומק הפנוי פחות 100"
+    },
+    {
+      "id": "H",
+      "label": "גובה המשטח מהרצפה (כולל הגלגלים)",
+      "value": 900,
+      "min": 700,
+      "max": 1050,
+      "step": 10,
+      "fit": true,
+      "fitStage": 1
+    },
+    {
+      "id": "wheelH",
+      "label": "גובה הגלגל כולל התושבת (מ\"מ)",
+      "value": 125,
+      "min": 60,
+      "max": 200,
+      "step": 5
+    },
+    {
+      "id": "shelf",
+      "label": "מדף תחתון",
+      "value": 1,
+      "min": 0,
+      "max": 1,
+      "step": 1
+    },
+    {
+      "id": "shelfZ",
+      "label": "גובה המדף התחתון מהרצפה (מ\"מ)",
+      "value": 300,
+      "min": 150,
+      "max": 500,
+      "step": 10
+    },
+    {
+      "id": "wall",
+      "label": "קיר כלים מאחור — גובה מעל המשטח (מ\"מ)",
+      "value": 350,
+      "min": 0,
+      "max": 700,
+      "step": 50
+    },
+    {
+      "id": "gap",
+      "label": "מרווח ניקוז בין קרשי המשטח (מ\"מ)",
+      "value": 5,
+      "min": 0,
+      "max": 15,
+      "step": 1
+    }
+  ],
+  "derived": {
+    "frameZ": "H - board_t - rail_w",
+    "postH": "H - board_t - wheelH",
+    "innerW": "W - 2*rail_t",
+    "innerD": "D - 2*rail_t",
+    "nTop": "floor((D + gap) / (board_w + gap))",
+    "gapTop": "nTop > 1 ? (D - nTop*board_w) / (nTop - 1) : 0",
+    "shelfW": "innerW",
+    "nShelf": "floor((innerD + gap) / (board_w + gap))",
+    "gapShelf": "nShelf > 1 ? (innerD - nShelf*board_w) / (nShelf - 1) : 0",
+    "nWall": "wall > 0 ? max(1, floor((wall - 40 + gap) / (board_w + gap))) : 0",
+    "wallZ0": "H + wall - nWall*board_w - (nWall-1)*gap",
+    "px0": "rail_t",
+    "px1": "W - rail_t - post_t",
+    "py0": "rail_t",
+    "py1": "D - rail_t - post_t",
+    "uprightH": "H + wall - frameZ"
+  },
+  "dims": [
+    {
+      "label": "גובה עבודה",
+      "value": "H",
+      "from": [
+        "W + 120",
+        "0",
+        "0"
+      ],
+      "to": [
+        "W + 120",
+        "0",
+        "H"
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "caster",
+      "name": "גלגל עם בלם",
+      "profile": "caster",
+      "count": 4,
+      "at": [
+        "(i % 2 ? px1 : px0) + (post_t - 100)/2",
+        "(floor(i/2) ? py1 : py0) + (post_t - 100)/2",
+        "0"
+      ],
+      "size": [
+        "100",
+        "100",
+        "wheelH"
+      ]
+    },
+    {
+      "id": "post",
+      "name": "עמוד",
+      "profile": "post",
+      "count": 4,
+      "at": [
+        "i % 2 ? px1 : px0",
+        "floor(i/2) ? py1 : py0",
+        "wheelH"
+      ],
+      "size": [
+        "post_t",
+        "post_t",
+        "postH"
+      ]
+    },
+    {
+      "id": "railL",
+      "name": "קורה עליונה ארוכה (על פני העמודים)",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "0",
+        "i*(D - rail_t)",
+        "frameZ"
+      ],
+      "size": [
+        "W",
+        "rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "railS",
+      "name": "קורה עליונה קצרה (על פני העמודים)",
+      "profile": "rail",
+      "count": 2,
+      "at": [
+        "i*(W - rail_t)",
+        "rail_t",
+        "frameZ"
+      ],
+      "size": [
+        "rail_t",
+        "innerD",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "railM",
+      "name": "קורת אמצע",
+      "profile": "rail",
+      "count": 1,
+      "at": [
+        "(W - rail_t)/2",
+        "rail_t",
+        "frameZ"
+      ],
+      "size": [
+        "rail_t",
+        "innerD",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "lowL",
+      "name": "קורה תחתונה ארוכה",
+      "profile": "rail",
+      "count": "2*shelf",
+      "at": [
+        "0",
+        "i*(D - rail_t)",
+        "shelfZ - rail_w"
+      ],
+      "size": [
+        "W",
+        "rail_t",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "lowS",
+      "name": "קורה תחתונה קצרה",
+      "profile": "rail",
+      "count": "2*shelf",
+      "at": [
+        "i*(W - rail_t)",
+        "rail_t",
+        "shelfZ - rail_w"
+      ],
+      "size": [
+        "rail_t",
+        "innerD",
+        "rail_w"
+      ]
+    },
+    {
+      "id": "top",
+      "name": "קרש משטח",
+      "profile": "board",
+      "count": "nTop",
+      "at": [
+        "0",
+        "i*(board_w + gapTop)",
+        "H - board_t"
+      ],
+      "size": [
+        "W",
+        "board_w",
+        "board_t"
+      ]
+    },
+    {
+      "id": "shelfB",
+      "name": "קרש מדף",
+      "profile": "board",
+      "count": "nShelf*shelf",
+      "at": [
+        "rail_t + post_t",
+        "rail_t + i*(board_w + gapShelf)",
+        "shelfZ"
+      ],
+      "size": [
+        "innerW - 2*post_t",
+        "board_w",
+        "board_t"
+      ]
+    },
+    {
+      "id": "upright",
+      "name": "ניצב קיר הכלים (על הקורה האחורית)",
+      "profile": "board",
+      "count": "wall > 0 ? 2 : 0",
+      "at": [
+        "i*(W - board_w)",
+        "D",
+        "frameZ"
+      ],
+      "size": [
+        "board_w",
+        "board_t",
+        "uprightH"
+      ]
+    },
+    {
+      "id": "wallB",
+      "name": "קרש קיר הכלים",
+      "profile": "board",
+      "count": "nWall",
+      "at": [
+        "0",
+        "D + board_t",
+        "wallZ0 + i*(board_w + gap)"
+      ],
+      "size": [
+        "W",
+        "board_t",
+        "board_w"
+      ]
+    }
+  ],
+  "joints": [
+    {
+      "a": "post",
+      "b": "caster",
+      "method": "none"
+    },
+    {
+      "a": "railL",
+      "b": "post",
+      "through": "railL",
+      "count": 2
+    },
+    {
+      "a": "railS",
+      "b": "post",
+      "through": "railS",
+      "count": 2
+    },
+    {
+      "a": "railM",
+      "b": "railL",
+      "through": "railL",
+      "count": 2
+    },
+    {
+      "a": "lowL",
+      "b": "post",
+      "through": "lowL",
+      "count": 2
+    },
+    {
+      "a": "lowS",
+      "b": "post",
+      "through": "lowS",
+      "count": 2
+    },
+    {
+      "a": "top",
+      "b": "railL",
+      "count": 1
+    },
+    {
+      "a": "top",
+      "b": "railS",
+      "count": 1
+    },
+    {
+      "a": "top",
+      "b": "railM",
+      "count": 1
+    },
+    {
+      "a": "top",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "top",
+      "b": "top",
+      "method": "none"
+    },
+    {
+      "a": "shelfB",
+      "b": "lowL",
+      "count": 1
+    },
+    {
+      "a": "shelfB",
+      "b": "lowS",
+      "count": 1
+    },
+    {
+      "a": "shelfB",
+      "b": "shelfB",
+      "method": "none"
+    },
+    {
+      "a": "shelfB",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "upright",
+      "b": "railL",
+      "through": "upright",
+      "count": 2
+    },
+    {
+      "a": "upright",
+      "b": "top",
+      "method": "none"
+    },
+    {
+      "a": "wallB",
+      "b": "upright",
+      "count": 1
+    },
+    {
+      "a": "wallB",
+      "b": "wallB",
+      "method": "none"
+    },
+    {
+      "a": "wallB",
+      "b": "top",
+      "method": "none"
+    },
+    {
+      "a": "railL",
+      "b": "railS",
+      "method": "none"
+    },
+    {
+      "a": "lowL",
+      "b": "lowS",
+      "method": "none"
+    },
+    {
+      "a": "railM",
+      "b": "railS",
+      "method": "none"
+    },
+    {
+      "a": "railL",
+      "b": "lowL",
+      "method": "none"
+    }
+  ],
+  "extras": [
+    {
+      "name": "גלגל מסתובב עם בלם, 125 מ\"מ, לפחות 100 ק\"ג לגלגל (4 יח׳)",
+      "qty": 4,
+      "price": 45,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "ברגי עץ 6×40 לתושבות הגלגלים (4 לכל גלגל)",
+      "qty": 16,
+      "price": 1,
+      "icon": "screwSmall"
+    },
+    {
+      "name": "ווים לתליית כלים על קיר הכלים",
+      "qty": 8,
+      "price": 5,
+      "icon": "hook"
+    }
+  ],
+  "steps": [
+    {
+      "title": "חיתוך",
+      "text": "חתוך את ארבעת העמודים (כולם באותו אורך), הקורות והקרשים לפי תוכנית החיתוך. סמן על כל עמוד את גובה המסגרת העליונה והמדף.",
+      "add": []
+    },
+    {
+      "title": "שתי המסגרות הצדדיות",
+      "text": "בנה כל צד בנפרד על הרצפה: שני עמודים, ועליהם מבחוץ הקורה העליונה הקצרה (בגובה הסימון) והקורה התחתונה הקצרה. הקורות יושבות על פני העמודים — הברג דרך הקורה אל העמוד, שני ברגים בכל עמוד. בדוק ניצבות.",
+      "add": [
+        "post",
+        "railS",
+        "lowS"
+      ],
+      "tip": "שני הצדדים זהים — בנה אותם זה על גבי זה כדי לוודא שהם שווים."
+    },
+    {
+      "title": "חיבור הצדדים",
+      "text": "העמד את שני הצדדים, והברג עליהם מבחוץ את הקורות הארוכות — העליונות והתחתונות — באותו גובה כמו הקצרות. הקורות הארוכות מכסות את קצות הקצרות. הוסף את קורת האמצע בין הקורות העליונות הארוכות: הברג דרך הקורה הארוכה אל קצה קורת האמצע.",
+      "add": [
+        "railL",
+        "lowL",
+        "railM"
+      ]
+    },
+    {
+      "title": "הגלגלים",
+      "text": "הפוך את השלד, והברג גלגל לתחתית כל עמוד (4 ברגים לתושבת). שני גלגלים עם בלם לפחות — בצד אחד — כדי שהשולחן לא יזוז בזמן העבודה.",
+      "add": [
+        "caster"
+      ],
+      "tip": "גלגלים גדולים (125 מ\"מ ומעלה) נוסעים על חצץ ודשא. קטנים נתקעים."
+    },
+    {
+      "title": "המדף התחתון",
+      "text": "הנח את קרשי המדף על המסגרת התחתונה, בין העמודים, עם מרווח קטן ביניהם לניקוז, והברג כל קרש לקורות.",
+      "add": [
+        "shelfB"
+      ]
+    },
+    {
+      "title": "המשטח",
+      "text": "הנח את קרשי המשטח לרוחב על המסגרת העליונה, מהקצה הקדמי, עם מרווח הניקוז, והברג כל קרש לשתי הקורות הארוכות ולקורת האמצע. המשטח מכסה את ראשי העמודים.",
+      "add": [
+        "top"
+      ],
+      "tip": "מרווח של 5 מ\"מ מספיק לגשם ולא מפריע לעבודה."
+    },
+    {
+      "title": "קיר הכלים",
+      "text": "הברג את שני הניצבים לפני הקורה העליונה האחורית, מבחוץ, כך שהם עולים מעל המשטח. הברג עליהם לרוחב את קרשי קיר הכלים, ועל הקרשים — ווים לכלים.",
+      "add": [
+        "upright",
+        "wallB"
+      ]
+    },
+    {
+      "title": "גימור לחוץ",
+      "text": "לטש קצוות, ומרח שמן/לזורה לעץ חיצוני — שתי שכבות. חדש כל שנה. בחורף אפשר לכסות ביריעה.",
+      "add": []
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 // Offline cache: the whole app shell is cached on first visit; later visits work without reception.
 // Network-first for app files (so updates arrive when online), cache-first for the big vendor libs.
-const VERSION = 'cp-v53';
+const VERSION = 'cp-v54';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './brand/favicon.svg',
   './brand/woody-header.svg', './brand/favicon.svg', './brand/fonts/Heebo.ttf', './brand/fonts/NunitoSans.ttf',
@@ -8,7 +8,7 @@ const SHELL = [
   './js/app.js', './js/model.js', './js/expr.js', './js/joints.js', './js/parts.js', './js/cutlist.js',
   './js/bom.js', './js/assembly.js', './js/render.js', './js/icons.js', './js/viewer.js', './js/fit.js',
   './catalog/default-catalog.json', './designs/index.json',
-  './designs/potting-bench.json', './designs/irrigation-cabinet.json', './designs/rolling-table.json', './designs/planter-box.json', './designs/shelf-unit.json', './designs/pergola-leanto.json', './designs/crosscut-jig.json',
+  './designs/potting-bench.json', './designs/irrigation-cabinet.json', './designs/rolling-table.json', './designs/planter-box.json', './designs/shelf-unit.json', './designs/pergola-leanto.json', './designs/crosscut-jig.json', './designs/garden-workbench.json',
   './vendor/gallab-store.js', './vendor/three/three.module.js', './vendor/three/OrbitControls.js', './vendor/three/SVGRenderer.js', './vendor/renderers/Projector.js',
 ];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
