@@ -168,6 +168,7 @@ function renderList() {
   $('#secTitle').textContent = filterLabel(filter.key) || 'הספרייה';
   $('#clearSearch').hidden = !filter.q;
   $('#filterBtn').setAttribute('aria-pressed', !!filter.key);
+  $$('#tabbar .tab[data-key]').forEach(b => b.setAttribute('aria-selected', b.dataset.key === filter.key));
   const af = $('#activeFilter'); af.hidden = !filter.key;
   if (filter.key) { $('#activeChip').textContent = filterLabel(filter.key); $('#activeCount').textContent = `${items.length} פריטים`; }
   renderFilterSheet();
@@ -359,6 +360,7 @@ function hideErr() { $('#addErr').hidden = true; }
 let toastTimer; function toast(msg) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 2500); }
 
 $('#fab').onclick = openSheet;
+$('#tabbar').onclick = e => { const b = e.target.closest('.tab[data-key]'); if (b) setFilter(b.dataset.key); };
 $('#scrim').onclick = () => { closeSheet(); closeFilter(); };
 $('#sheet').onsubmit = e => { e.preventDefault(); addLink($('#urlInput').value, $('#textInput').value.trim() || null); };
 $('#toggleText').onclick = () => { const t = $('#textInput'); t.hidden = !t.hidden; if (!t.hidden) t.focus(); };

@@ -31,7 +31,7 @@
   header.top .logo { height:64px; width:auto; max-width:60vw; justify-self:center; display:block; }
   .syncdot { width:9px; height:9px; border-radius:50%; background:var(--ok); justify-self:center; } .syncdot[data-state=off] { background:var(--muted); } .syncdot[data-state=busy] { background:var(--oak); }
 
-  main { max-width:1100px; margin:0 auto; padding:14px 16px calc(var(--safe-bottom) + 96px); }
+  main { max-width:1100px; margin:0 auto; padding:14px 16px calc(var(--safe-bottom) + 110px); }
 
   /* ---------- search row ---------- */
   .searchrow { display:flex; gap:8px; align-items:center; }
@@ -96,9 +96,19 @@
   .empty-state b { display:block; font-size:20px; color:var(--ink); margin-bottom:6px; }
 
   /* ---------- add (floating button + sheet) ---------- */
-  .fab { position:fixed; bottom:calc(var(--safe-bottom) + 18px); inset-inline-start:18px; height:56px; padding:0 20px 0 16px; border-radius:999px; border:none; background:var(--accent); color:#fff; font-weight:800; font-size:16px; box-shadow:0 10px 24px rgb(244 81 46 / .4); cursor:pointer; display:flex; align-items:center; gap:8px; z-index:25; }
-  .fab:hover { background:var(--accent-dark); }
-  .fab svg { width:24px; height:24px; }
+  /* ---------- bottom tab bar, like Kort: four tabs and a raised + in the middle ---------- */
+  .tabbar { position:fixed; inset:auto 0 0 0; z-index:25; background:var(--bg); border-top:1px solid var(--line); display:flex; align-items:flex-end; padding:6px 0 calc(var(--safe-bottom) + 6px); }
+  .tabbar .tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2px; min-height:56px; padding:4px 0; background:none; border:none; cursor:pointer; color:var(--muted); font-size:11px; font-weight:600; text-decoration:none; }
+  .tabbar .tab svg { width:24px; height:24px; }
+  .tabbar .tab[aria-selected=true] { color:var(--accent); } .tabbar .tab[aria-selected=true] svg path { fill:currentColor; }
+  .tabbar .tab.img img { width:26px; height:26px; object-fit:contain; display:block; }
+  .tabbar .mid { flex:1; min-height:56px; }
+  .tabbar .addwrap { position:absolute; top:-26px; left:0; right:0; display:flex; justify-content:center; pointer-events:none; }
+  .tabbar .ring { position:absolute; top:-6px; width:76px; height:76px; border-radius:50%; background:var(--bg); }
+  .tabbar .add { position:relative; width:64px; height:64px; border-radius:50%; border:none; background:var(--accent); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 24px rgb(244 81 46 / .4); pointer-events:auto; transition:transform .1s; }
+  .tabbar .add:active { transform:scale(.94); }
+  .tabbar .add svg { width:34px; height:34px; }
+  .tabbar .add:hover { background:var(--accent-dark); }
   .sheet { position:fixed; inset:auto 0 0 0; background:var(--panel); border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgb(0 0 0 / .18); padding:14px 18px calc(var(--safe-bottom) + 18px); z-index:40; transform:translateY(105%); transition:transform .22s ease; max-width:720px; margin:0 auto; }
   .sheet.open { transform:none; }
   .sheet .grab { width:42px; height:5px; border-radius:3px; background:var(--line); margin:0 auto 12px; }
@@ -170,10 +180,10 @@
   dialog textarea { min-height:80px; resize:vertical; }
   dialog .row2 { display:flex; gap:10px; } dialog .row2 > * { flex:1; }
   dialog .actions { display:flex; gap:8px; margin-top:4px; }
-  .toast { position:fixed; bottom:calc(var(--safe-bottom) + 90px); inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; border-radius:999px; padding:10px 20px; font-size:14px; z-index:60; box-shadow:var(--shadow); }
+  .toast { position:fixed; bottom:calc(var(--safe-bottom) + 100px); inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; border-radius:999px; padding:10px 20px; font-size:14px; z-index:60; box-shadow:var(--shadow); }
   @media (min-width:700px) {
     header.top .logo { height:40px; width:130px; }
-    .fab { inset-inline-start:auto; inset-inline-end:28px; }
+    .tabbar { max-width:720px; margin:0 auto; border:1px solid var(--line); border-bottom:none; border-radius:22px 22px 0 0; }
   }
 </style>
 </head>
@@ -197,7 +207,14 @@
     <div class="grid" id="grid"></div>
     <div class="empty-state" id="empty" hidden><b>הספרייה עדיין ריקה</b>שמרו את הפוסט הראשון: לחצו על <b>+ קישור</b>, או שתפו פוסט מהטלפון אל Saw.</div>
   </main>
-  <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>קישור</button>
+  <nav class="tabbar" id="tabbar">
+    <button class="tab" data-key="" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 19V5a1 1 0 0 1 1-1h3v15H5a1 1 0 0 1-1 0zM9 19V4h4v15zM14 18.5 16.5 4l3.5.7L17.5 19z"/></svg>הספרייה</button>
+    <button class="tab" data-key="want" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20.5 9.5 9 21H3v-6zM12 6l6 6"/></svg>רוצה לבנות</button>
+    <span class="mid"></span>
+    <button class="tab" data-key="star" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.4-7.5 10-7.5 10z"/></svg>מועדפים</button>
+    <a class="tab img" href="../"><img src="../brand/woody-symbol.svg" alt="">Woody</a>
+    <div class="addwrap"><span class="ring"></span><button class="add" id="fab" title="שמירת פוסט"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
+  </nav>
   <div class="scrim" id="scrim"></div>
   <div class="sheet fsheet" id="fsheet">
     <div class="grab"></div>
