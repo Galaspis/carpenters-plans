@@ -20,6 +20,12 @@ const PLATFORM_LABEL = { facebook: 'פייסבוק', instagram: 'אינסטגר�
 const PLATFORM_GLYPH = { facebook: 'f', instagram: '◎', youtube: '▶', tiktok: '♪', web: '🪵' };
 const STATUS_LABEL = { saved: 'שמור', want: 'רוצה לבנות', done: 'בניתי' };
 const ICON = {
+  whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.7 11.5 11.5 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20.5 9.5 9 21H3v-6zM12 6l6 6"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
   heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.4-7.5 10-7.5 10z"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
@@ -274,12 +280,6 @@ function renderDetail() {
         <button class="cbtn" id="dMore" title="עוד">${ICON.more}</button>
       </div>
       ${isVideo ? `<a class="play" href="${esc(it.url)}" target="_blank" rel="noopener" title="פתח את הסרטון">${ICON.play}</a>` : ''}
-      <div class="menu" id="dMenu" hidden>
-        <button id="mEdit">עריכה</button>
-        <button id="mRetry" ${it.pending ? 'disabled' : ''}>סכם שוב</button>
-        <button id="mCopy">העתק קישור</button>
-        <button id="mDelete" style="color:var(--warn)">מחק</button>
-      </div>
     </div>
     <div class="dsheet">
       <h1>${esc(it.title || (it.pending ? 'קורא את הפוסט…' : 'ללא כותרת'))}</h1>
@@ -300,18 +300,35 @@ function renderDetail() {
   d.hidden = false; $('#list').hidden = true; document.body.style.overflow = 'hidden';
   $('#dBack').onclick = () => closeDetail();
   $('#dStar').onclick = () => { it.star = !it.star; touch(it); };
-  $('#dMore').onclick = e => { e.stopPropagation(); $('#dMenu').hidden = !$('#dMenu').hidden; };
-  d.onclick = () => { const m = $('#dMenu'); if (m) m.hidden = true; };
-  $('#mEdit').onclick = () => openEdit(it);
-  $('#mRetry').onclick = async () => { const text = prompt('לא חובה: הדביקו את הכיתוב של הפוסט כדי לעזור לסיכום', '') ?? null; if (text === null) return; await enrich(it, text.trim() || null); };
-  $('#mCopy').onclick = async () => { try { await navigator.clipboard.writeText(it.url); toast('הקישור הועתק'); } catch { prompt('הקישור:', it.url); } };
-  $('#mDelete').onclick = () => { if (confirm(`למחוק "${it.title || it.url}" מהספרייה?`)) { closeDetail(); removeItem(it.id); } };
+  $('#dMore').onclick = e => { e.stopPropagation(); openActions(it); };
   $$('.statusrow .chip', d).forEach(b => b.onclick = () => { it.status = b.dataset.status; touch(it); });
   $$('.dtags button', d).forEach(b => b.onclick = () => { closeDetail(); setFilter('tag:' + b.dataset.tag); });
   $$('.tabs button', d).forEach(b => b.onclick = () => { tab = b.dataset.tab; renderDetail(); });
   const notes = $('#notesInput'); if (notes) { let t; notes.oninput = () => { clearTimeout(t); t = setTimeout(() => { it.notes = notes.value.trim(); it.updated = Date.now(); persistLocal(); if (store) { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1200); } }, 500); }; }
 }
 function renderAll() { renderList(); if (openId) { const keep = $('#notesInput'); if (keep && document.activeElement === keep) return; renderDetail(); } }
+
+// ---------------------------------------------------------------------------
+// action sheet (⋯), the same rows as Kort's recipe menu
+// ---------------------------------------------------------------------------
+function shareText(it) { return [it.title, it.summary, it.url].filter(Boolean).join('\n\n'); }
+function openActions(it) {
+  const sh = $('#asheet');
+  const rows = [
+    { id: 'wa', cls: 'wa', icon: ICON.whatsapp, label: 'שליחה בוואטסאפ', run: () => window.open('https://wa.me/?text=' + encodeURIComponent(shareText(it)), '_blank', 'noopener') },
+    { id: 'share', icon: ICON.share, label: 'שיתוף אחר', run: async () => { try { if (navigator.share) await navigator.share({ title: it.title || 'Saw', text: shareText(it), url: it.url }); else { await navigator.clipboard.writeText(shareText(it)); toast('הטקסט הועתק'); } } catch {} } },
+    { id: 'copy', icon: ICON.copy, label: 'העתקת הקישור', run: async () => { try { await navigator.clipboard.writeText(it.url); toast('הקישור הועתק'); } catch { prompt('הקישור:', it.url); } } },
+    { id: 'retry', icon: ICON.refresh, label: 'סיכום מחדש', run: async () => { if (it.pending) return; const text = prompt('לא חובה: הדביקו את הכיתוב של הפוסט כדי לעזור לסיכום', '') ?? null; if (text === null) return; await enrich(it, text.trim() || null); } },
+    { id: 'edit', icon: ICON.edit, label: 'עריכת הכרטיס', run: () => openEdit(it) },
+    { id: 'del', cls: 'danger', icon: ICON.trash, label: 'מחיקה מהספרייה', run: () => { if (confirm(`למחוק "${it.title || it.url}" מהספרייה?`)) { closeDetail(); removeItem(it.id); } } },
+  ];
+  sh.innerHTML = `<div class="grab"></div><h3>${esc(it.title || 'הפוסט')}</h3>${it.author ? `<p class="sub muted">${esc(it.author)}</p>` : ''}` +
+    rows.map(r => `<button class="arow ${r.cls || ''}" data-act="${r.id}"><span class="tile">${r.icon}</span>${r.label}</button>`).join('') +
+    `<button class="btn ghost block cancel" data-act="cancel">ביטול</button>`;
+  sh.onclick = e => { const b = e.target.closest('[data-act]'); if (!b) return; closeActions(); const r = rows.find(x => x.id === b.dataset.act); if (r) setTimeout(r.run, 150); };
+  sh.classList.add('open'); $('#scrim').classList.add('open');
+}
+function closeActions() { $('#asheet').classList.remove('open'); $('#scrim').classList.remove('open'); }
 
 // ---------------------------------------------------------------------------
 // edit dialog
@@ -361,7 +378,7 @@ let toastTimer; function toast(msg) { const el = $('#toast'); el.textContent = m
 
 $('#fab').onclick = openSheet;
 $('#tabbar').onclick = e => { const b = e.target.closest('.tab[data-key]'); if (b) setFilter(b.dataset.key); };
-$('#scrim').onclick = () => { closeSheet(); closeFilter(); };
+$('#scrim').onclick = () => { closeSheet(); closeFilter(); closeActions(); };
 $('#sheet').onsubmit = e => { e.preventDefault(); addLink($('#urlInput').value, $('#textInput').value.trim() || null); };
 $('#toggleText').onclick = () => { const t = $('#textInput'); t.hidden = !t.hidden; if (!t.hidden) t.focus(); };
 $('#search').oninput = e => { filter.q = e.target.value; renderList(); };
