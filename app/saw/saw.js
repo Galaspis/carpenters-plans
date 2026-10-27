@@ -70,7 +70,7 @@ async function syncNow() {
   } catch (e) { console.warn('sync', e.message); setSync('off'); }
   finally { syncing = false; if (syncAgain) { syncAgain = false; setTimeout(syncNow, 500); } }
 }
-function setSync(s) { const el = $('#syncDot'); el.dataset.state = s; el.title = s === 'ok' ? 'מסונכרן בין המכשירים' : s === 'busy' ? 'מסתנכרן…' : 'לא מחובר — עובד מהעותק המקומי'; }
+function setSync(s) { const el = $('#syncDot'); if (!el) return; el.dataset.state = s; el.title = s === 'ok' ? 'מסונכרן בין המכשירים' : s === 'busy' ? 'מסתנכרן…' : 'לא מחובר — עובד מהעותק המקומי'; }
 
 // ---------------------------------------------------------------------------
 // items
