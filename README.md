@@ -57,7 +57,9 @@ to a file is also built in (`app/js/app.js`, `setupBackup`).
 
 `woody.gallab.top/saw` is a small library of woodworking posts found on Facebook,
 Instagram, YouTube, TikTok or blogs. Paste a link (or, on the phone, share the post
-to Woody: the manifest's `share_target` opens `/saw/?url=…`) and the page asks
+to Woody: the manifest's `share_target` opens `/saw/?url=…`; an iPhone Shortcut opens
+`/saw/#url=…` instead, because the login gate drops the query string when it bounces
+a request through auth.gallab.top) and the page asks
 Kort's importer (`POST /api/saw/enrich`, proxied by `deploy/woody.caddy` to Kort on
 port 8787) for the caption, a thumbnail copy and a short Hebrew summary with type,
 tags, materials, tools and key points. Only links are kept, never the video. Cards

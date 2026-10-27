@@ -232,16 +232,29 @@ $('#grid').onclick = e => {
 };
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncNow(); });
 
-// Share target (manifest share_target → /saw/?url=…&text=…&title=…). Facebook often puts the link in `text`.
+// Incoming share. Two doors:
+//  - manifest share_target (Android / desktop Chrome): /saw/?url=…&text=…&title=…
+//  - iPhone Shortcut: /saw/#url=… — the link rides in the hash because the login gate
+//    (auth.gallab.top) drops the query string when it bounces a request, even silently.
+// Facebook often puts the link inside `text` rather than `url`, so any field may hold it.
+function incomingShare() {
+  const p = new URLSearchParams(location.search);
+  const fromQuery = p.get('url') || p.get('text') || p.get('title');
+  if (fromQuery) return fromQuery;
+  const h = location.hash.replace(/^#/, '');
+  if (!h) return null;
+  const raw = h.replace(/^(url|text)=/, '');
+  try { return decodeURIComponent(raw); } catch { return raw; }
+}
+window.addEventListener('error', e => showErr('שגיאה בדף: ' + (e.message || e.type)));
 async function init() {
   render();
   if (store) await Promise.race([syncNow(), new Promise(r => setTimeout(r, 5000))]);
-  const p = new URLSearchParams(location.search);
-  const shared = p.get('url') || p.get('text') || p.get('title');
+  const shared = incomingShare();
   if (shared) {
     history.replaceState(null, '', location.pathname);
     const url = cleanUrl(shared);
-    if (url) await addLink(url, null);
+    if (url) { toast('התקבל מהשיתוף'); await addLink(url, null); }
     else { $('#urlInput').value = shared; showErr('לא מצאתי קישור במה ששותף. הדביקו את הקישור ושמרו.'); }
   }
 }
