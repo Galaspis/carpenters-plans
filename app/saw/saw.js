@@ -42,9 +42,18 @@ const ICON = {
 // Every item carries `updated`; when two devices disagree the newer item wins.
 // ---------------------------------------------------------------------------
 let doc = loadLocal();
+// Items being read right now (this page only). Never stored: a saved 'pending' flag used to survive a
+// closed tab and show 'reading the post' for ever.
+const inflight = new Set();
+const isBusy = it => inflight.has(it.id);
 function emptyDoc() { return { app: 'saw', items: {}, deleted: {} }; }
 function loadLocal() { try { return normalizeDoc(JSON.parse(localStorage.getItem(LOCAL_KEY))); } catch { return emptyDoc(); } }
-function normalizeDoc(d) { if (!d || typeof d !== 'object') return emptyDoc(); return { app: 'saw', items: d.items || {}, deleted: d.deleted || {} }; }
+function normalizeDoc(d) {
+  if (!d || typeof d !== 'object') return emptyDoc();
+  const items = d.items || {};
+  for (const it of Object.values(items)) delete it.pending; // older documents still carry the flag
+  return { app: 'saw', items, deleted: d.deleted || {} };
+}
 function persistLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(doc)); } catch {} }
 function mergeDocs(a, b) {
   const out = emptyDoc();
@@ -109,13 +118,14 @@ async function addLink(raw, text) {
   if (!url) { showErr('זה לא נראה כמו קישור.'); return; }
   const id = idFor(url);
   if (doc.items[id]) { toast('הקישור הזה כבר שמור'); closeSheet(); openDetail(id); return; }
-  const it = { id, url, platform: platformOf(url), title: '', summary: '', type: 'inspiration', tags: [], materials: [], tools: [], key_points: [], difficulty: '', author: null, thumb: null, status: 'saved', star: false, notes: '', added: Date.now(), updated: Date.now(), pending: true };
+  const it = { id, url, platform: platformOf(url), title: '', summary: '', type: 'inspiration', tags: [], materials: [], tools: [], key_points: [], difficulty: '', author: null, thumb: null, status: 'saved', star: false, notes: '', added: Date.now(), updated: Date.now() };
   doc.items[id] = it; scheduleSync();
   $('#urlInput').value = ''; $('#textInput').value = ''; hideErr(); closeSheet();
   await enrich(it, text);
 }
 async function enrich(it, text) {
-  it.pending = true; it.error = null; renderAll();
+  if (inflight.has(it.id)) return;
+  inflight.add(it.id); it.error = null; renderAll();
   try {
     const r = await fetch('/api/saw/enrich', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: it.url, text: text || undefined }) });
     const data = await r.json().catch(() => ({}));
@@ -125,13 +135,15 @@ async function enrich(it, text) {
       title: data.title || cur.title, summary: data.summary || cur.summary, type: data.type || cur.type,
       tags: data.tags || [], materials: data.materials || [], tools: data.tools || [], key_points: data.key_points || [],
       difficulty: data.difficulty || '', author: data.author ?? cur.author, thumb: data.thumbnail_url || cur.thumb,
-      platform: data.platform || cur.platform, caption: data.caption || null, duration: data.duration_seconds || null, pending: false, error: null, enrichedAt: Date.now(),
+      platform: data.platform || cur.platform, caption: data.caption || null, duration: data.duration_seconds || null, error: null, enrichedAt: Date.now(),
     });
     touch(cur);
   } catch (e) {
     const cur = doc.items[it.id]; if (!cur) return;
-    cur.pending = false; cur.error = e.message; touch(cur);
+    cur.error = e.message; touch(cur);
     toast('הקישור נשמר, אבל בלי תקציר');
+  } finally {
+    inflight.delete(it.id); renderAll();
   }
 }
 
@@ -201,7 +213,8 @@ function thumbHtml(it, cls = '') {
     : `<div class="ph ${cls}">${glyph}</div>`;
 }
 function card(it, featured) {
-  const title = it.title || (it.pending ? 'קורא את הפוסט…' : it.error ? 'בלי תקציר — לחצו להשלים' : PLATFORM_LABEL[it.platform] || 'ללא כותרת');
+  const busy = isBusy(it);
+  const title = it.title || (busy ? 'קורא את הפוסט…' : it.error ? 'בלי תקציר — לחצו להשלים' : PLATFORM_LABEL[it.platform] || 'ללא כותרת');
   return `<article class="pcard ${featured ? 'featured' : ''}" data-open="${it.id}">
     ${thumbHtml(it)}
     <div class="shade"></div>
@@ -213,7 +226,7 @@ function card(it, featured) {
       ${featured && it.summary ? `<p class="desc">${esc(it.summary)}</p>` : ''}
       <div class="meta">${!featured && it.type ? `<span>${TYPE_LABEL[it.type] || ''}</span>` : ''}${it.author ? `<span>· ${esc(it.author)}</span>` : `<span>${!featured && it.type ? '· ' : ''}${PLATFORM_LABEL[it.platform] || ''}</span>`}</div>
     </div>
-    ${it.pending ? `<div class="busy">קורא את הפוסט ומסכם…</div>` : ''}
+    ${busy && !it.title ? `<div class="busy">קורא את הפוסט ומסכם…</div>` : busy ? `<span class="pill busytag">מעדכן תקציר…</span>` : ''}
   </article>`;
 }
 
@@ -229,10 +242,10 @@ function openDetail(id) {
   renderDetail();
 }
 function refreshIfStale(it) {
-  if (it.pending || it.error) return;
+  if (isBusy(it) || it.error) return;
   if ((it.enrichedAt || 0) >= PROMPT_FIXED_AT) return;
   if (!it.summary && !it.title) return;
-  it.enrichedAt = PROMPT_FIXED_AT; // only once, even if the call fails
+  it.enrichedAt = PROMPT_FIXED_AT; persistLocal(); // only once, even if the call fails
   enrich(it, null);
 }
 function closeDetail(viaHistory) {
@@ -261,7 +274,7 @@ function renderDetail() {
   const plain = (arr) => arr && arr.length ? `<ul>${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
   let panel = '';
   if (tab === 'points') {
-    panel = numbered(it.key_points) || `<p class="none">${it.pending ? 'קורא את הפוסט…' : it.error ? 'אין תקציר: ' + esc(it.error) : 'אין נקודות שמורות לפוסט הזה.'}</p>`;
+    panel = numbered(it.key_points) || `<p class="none">${isBusy(it) ? 'קורא את הפוסט…' : it.error ? 'אין תקציר: ' + esc(it.error) : 'אין נקודות שמורות לפוסט הזה.'}</p>`;
     if (it.caption) panel += `<details><summary>הכיתוב המקורי</summary><div class="caption">${esc(it.caption)}</div></details>`;
   } else if (tab === 'stuff') {
     panel = (it.materials?.length ? `<h4>חומרים</h4>${plain(it.materials)}` : '') + (it.tools?.length ? `<h4>כלים</h4>${plain(it.tools)}` : '');
@@ -282,7 +295,7 @@ function renderDetail() {
       ${isVideo ? `<a class="play" href="${esc(it.url)}" target="_blank" rel="noopener" title="פתח את הסרטון">${ICON.play}</a>` : ''}
     </div>
     <div class="dsheet">
-      <h1>${esc(it.title || (it.pending ? 'קורא את הפוסט…' : 'ללא כותרת'))}</h1>
+      <h1>${esc(it.title || (isBusy(it) ? 'קורא את הפוסט…' : 'ללא כותרת'))}</h1>${isBusy(it) && it.title ? '<p class="muted" style="margin:0 0 8px">מעדכן את התקציר…</p>' : ''}
       ${it.summary ? `<p class="lead">${esc(it.summary)}</p>` : it.error ? `<div class="err">${esc(it.error)}</div>` : ''}
       <div class="metarow">${metas.join('<span class="div"></span>')}</div>
       <div class="statusrow">${['saved', 'want', 'done'].map(s => `<button class="chip" data-status="${s}" aria-pressed="${(it.status || 'saved') === s}">${STATUS_LABEL[s]}</button>`).join('')}</div>
@@ -318,7 +331,7 @@ function openActions(it) {
     { id: 'wa', cls: 'wa', icon: ICON.whatsapp, label: 'שליחה בוואטסאפ', run: () => window.open('https://wa.me/?text=' + encodeURIComponent(shareText(it)), '_blank', 'noopener') },
     { id: 'share', icon: ICON.share, label: 'שיתוף אחר', run: async () => { try { if (navigator.share) await navigator.share({ title: it.title || 'Saw', text: shareText(it), url: it.url }); else { await navigator.clipboard.writeText(shareText(it)); toast('הטקסט הועתק'); } } catch {} } },
     { id: 'copy', icon: ICON.copy, label: 'העתקת הקישור', run: async () => { try { await navigator.clipboard.writeText(it.url); toast('הקישור הועתק'); } catch { prompt('הקישור:', it.url); } } },
-    { id: 'retry', icon: ICON.refresh, label: 'סיכום מחדש', run: async () => { if (it.pending) return; const text = prompt('לא חובה: הדביקו את הכיתוב של הפוסט כדי לעזור לסיכום', '') ?? null; if (text === null) return; await enrich(it, text.trim() || null); } },
+    { id: 'retry', icon: ICON.refresh, label: 'סיכום מחדש', run: async () => { if (isBusy(it)) return; const text = prompt('לא חובה: הדביקו את הכיתוב של הפוסט כדי לעזור לסיכום', '') ?? null; if (text === null) return; await enrich(it, text.trim() || null); } },
     { id: 'edit', icon: ICON.edit, label: 'עריכת הכרטיס', run: () => openEdit(it) },
     { id: 'del', cls: 'danger', icon: ICON.trash, label: 'מחיקה מהספרייה', run: () => { if (confirm(`למחוק "${it.title || it.url}" מהספרייה?`)) { closeDetail(); removeItem(it.id); } } },
   ];

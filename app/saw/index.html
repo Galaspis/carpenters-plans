@@ -81,6 +81,7 @@
   .pcard .pill { position:absolute; top:12px; right:12px; background:rgba(255,255,255,.92); color:var(--ink); font-size:11px; font-weight:700; border-radius:999px; padding:3px 9px; }
   .pcard .pill[data-s=want] { background:var(--accent); color:#fff; } .pcard .pill[data-s=done] { background:var(--ok); color:#fff; }
   .pcard .busy { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.55); font-weight:700; color:var(--accent-text); font-size:13px; text-align:center; padding:12px; }
+  .pcard .pill.busytag { top:auto; bottom:auto; inset:auto 12px 12px auto; background:rgba(255,255,255,.92); color:var(--accent-text); }
   .pcard .busy::before { content:''; width:26px; height:26px; border:3px solid var(--accent); border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; position:absolute; top:calc(50% - 36px); }
   @keyframes spin { to { transform:rotate(360deg); } }
 
