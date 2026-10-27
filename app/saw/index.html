@@ -24,15 +24,12 @@
   [hidden] { display:none !important; }
   .ic { width:22px; height:22px; flex:none; vertical-align:middle; }
 
-  /* ---------- top bar (list view) ---------- */
-  header.top { background:var(--panel); border-bottom:1px solid var(--line); padding:calc(var(--safe-top) + 8px) 16px 8px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:30; }
-  header.top .logo { height:34px; width:110px; object-fit:contain; display:block; }
-  header.top .title { font-weight:900; font-size:22px; letter-spacing:-.3px; }
-  header.top .title small { font-weight:500; color:var(--muted); font-size:13px; margin-inline-start:8px; }
-  header.top .hgroup { margin-inline-start:auto; display:flex; gap:4px; align-items:center; }
-  .hbtn { background:transparent; color:var(--ink); border:1px solid transparent; border-radius:var(--r-control); min-height:40px; padding:6px 10px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; }
-  .hbtn:hover { background:var(--soft); border-color:var(--line); }
-  .syncdot { width:9px; height:9px; border-radius:50%; background:var(--ok); flex:none; margin:0 6px; } .syncdot[data-state=off] { background:var(--muted); } .syncdot[data-state=busy] { background:var(--oak); }
+  /* ---------- top bar (list view): Woody icon = back, Saw logo centred, like Kort's wordmark ---------- */
+  header.top { background:var(--bg); padding:calc(var(--safe-top) + 10px) 16px 6px; display:grid; grid-template-columns:44px 1fr 44px; align-items:center; position:sticky; top:0; z-index:30; }
+  header.top .backhome { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--panel); border:1px solid var(--line); }
+  header.top .backhome img { height:30px; width:auto; display:block; }
+  header.top .logo { height:64px; width:auto; max-width:60vw; justify-self:center; display:block; }
+  .syncdot { width:9px; height:9px; border-radius:50%; background:var(--ok); justify-self:center; } .syncdot[data-state=off] { background:var(--muted); } .syncdot[data-state=busy] { background:var(--oak); }
 
   main { max-width:1100px; margin:0 auto; padding:14px 16px calc(var(--safe-bottom) + 96px); }
 
@@ -42,15 +39,23 @@
   .search input { flex:1; border:none; background:transparent; min-height:44px; font-size:16px; color:var(--ink); outline:none; min-width:0; }
   .search svg { width:20px; height:20px; color:var(--muted); flex:none; }
   .search .clear { border:none; background:transparent; color:var(--muted); font-size:18px; cursor:pointer; padding:4px; }
-  .fbtn { width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--panel); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex:none; }
-  .fbtn[aria-pressed=true] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .search { padding-inline-end:5px; min-height:54px; }
+  .fbtn { width:42px; height:42px; border-radius:50%; border:none; background:var(--canvas); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+  .fbtn[aria-pressed=true] { background:var(--accent); color:#fff; }
   .fbtn svg { width:22px; height:22px; }
+  .activefilter { display:flex; align-items:center; gap:10px; margin:12px 0 0; }
+  .chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .chip.on::after { content:' ✕'; font-weight:400; opacity:.85; }
+  .fsheet .grp { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .fsheet .grp b { font-size:13px; color:var(--muted); }
+  .fsheet .wrap { display:flex; flex-wrap:wrap; gap:8px; }
+  .fsheet .head { display:flex; align-items:center; justify-content:space-between; }
+  .fsheet .scroll { max-height:60vh; overflow:auto; padding-bottom:6px; }
 
-  .chips { display:flex; gap:8px; overflow-x:auto; padding:12px 0 4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
-  .chips::-webkit-scrollbar { display:none; }
   .chip { flex:none; border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:7px 14px; font-size:14px; font-weight:600; cursor:pointer; min-height:36px; color:var(--ink); white-space:nowrap; }
   .chip[aria-pressed=true] { background:var(--ink); border-color:var(--ink); color:#fff; }
   .chip.tag { font-weight:500; }
+  .chip.withico { display:inline-flex; align-items:center; gap:6px; } .chip.withico svg { width:16px; height:16px; }
   .chip.tag[aria-pressed=true] { background:var(--accent); border-color:var(--accent); }
   .sectionhead { display:flex; align-items:baseline; gap:10px; margin:14px 0 10px; }
   .sectionhead h2 { margin:0; font-size:18px; font-weight:800; }
@@ -69,8 +74,10 @@
   .pcard .text { position:absolute; inset:auto 0 0 0; padding:12px; color:#fff; display:flex; flex-direction:column; gap:4px; }
   .pcard h3 { margin:0; font-size:15px; line-height:1.3; font-weight:800; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 2px rgb(0 0 0 / .4); }
   .pcard .meta { font-size:12px; opacity:.92; display:flex; gap:6px; align-items:center; }
-  .pcard .star { position:absolute; top:10px; left:10px; width:36px; height:36px; border-radius:50%; border:none; background:rgba(20,12,8,.45); color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .pcard .star[aria-pressed=true] { color:#FFB84D; }
+  .pcard .heart { position:absolute; top:10px; left:10px; width:36px; height:36px; border-radius:50%; border:none; background:rgba(20,12,8,.45); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .pcard .heart svg { width:19px; height:19px; }
+  .pcard .heart[aria-pressed=true] { color:#fff; } .pcard .heart[aria-pressed=true] svg path { fill:currentColor; }
+  .featured .heart { width:50px; height:50px; } .featured .heart svg { width:28px; height:28px; }
   .pcard .pill { position:absolute; top:12px; right:12px; background:rgba(255,255,255,.92); color:var(--ink); font-size:11px; font-weight:700; border-radius:999px; padding:3px 9px; }
   .pcard .pill[data-s=want] { background:var(--accent); color:#fff; } .pcard .pill[data-s=done] { background:var(--ok); color:#fff; }
   .pcard .busy { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.55); font-weight:700; color:var(--accent-text); font-size:13px; text-align:center; padding:12px; }
@@ -123,7 +130,7 @@
   .herobar .sp { flex:1; }
   .cbtn { width:44px; height:44px; border-radius:50%; border:none; background:rgba(255,255,255,.92); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); font-size:18px; text-decoration:none; }
   .cbtn svg { width:22px; height:22px; }
-  .cbtn.on { color:var(--accent); }
+  .cbtn.on { color:var(--accent); } .cbtn.on svg path { fill:currentColor; }
   .play { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:68px; height:68px; border-radius:50%; background:rgba(20,12,8,.55); border:2px solid rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; }
   .play svg { width:30px; height:30px; margin-inline-start:-3px; }
   .dsheet { background:var(--bg); border-radius:24px 24px 0 0; margin-top:-24px; position:relative; padding:22px 18px calc(var(--safe-bottom) + 110px); max-width:820px; margin-inline:auto; }
@@ -173,12 +180,9 @@
 <body>
 <div id="list">
   <header class="top">
-    <a href="../" title="חזרה ל-Woody"><img class="logo" src="../brand/woody-header.svg" alt="Woody"></a>
-    <span class="title">Saw <small>ספריית נגרות</small></span>
-    <span class="hgroup">
-      <a class="hbtn" href="../" title="תוכניות נגרות"><img class="ic" src="../brand/icons/assembly.svg" alt=""><span class="t">תוכניות</span></a>
-      <span class="syncdot" id="syncDot" data-state="off" title="מסתנכרן"></span>
-    </span>
+    <a class="backhome" href="../" title="חזרה ל-Woody"><img src="../brand/woody-symbol.svg" alt="Woody"></a>
+    <img class="logo" src="../brand/saw-header.svg" alt="Saw">
+    <span class="syncdot" id="syncDot" data-state="off" title="מסתנכרן"></span>
   </header>
   <main>
     <div class="searchrow">
@@ -186,26 +190,21 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" id="search" placeholder="חיפוש לפי שם, תגית, חומר או כלי…" autocomplete="off">
         <button class="clear" id="clearSearch" type="button" hidden aria-label="נקה">✕</button>
+        <button class="fbtn" id="filterBtn" type="button" aria-pressed="false" title="סינון"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
       </label>
-      <button class="fbtn" id="starFilter" aria-pressed="false" title="מועדפים בלבד">★</button>
     </div>
-    <div class="chips" id="typeChips">
-      <button class="chip" data-type="" aria-pressed="true">הכל</button>
-      <button class="chip" data-type="project">פרויקטים</button>
-      <button class="chip" data-type="technique">טכניקות</button>
-      <button class="chip" data-type="tool">כלים וג׳יגים</button>
-      <button class="chip" data-type="material">חומרים וגימור</button>
-      <button class="chip" data-type="inspiration">השראה</button>
-      <button class="chip" data-status="want">רוצה לבנות</button>
-      <button class="chip" data-status="done">בניתי</button>
-    </div>
-    <div class="chips" id="tagChips" hidden></div>
+    <div class="activefilter" id="activeFilter" hidden><span class="muted">מסונן לפי</span><button class="chip on" id="activeChip"></button><span class="muted" id="activeCount"></span></div>
     <div class="sectionhead"><h2 id="secTitle">הספרייה</h2><span class="count" id="count"></span><button class="clearf" id="clearFilters" hidden>נקה סינון</button></div>
     <div class="grid" id="grid"></div>
     <div class="empty-state" id="empty" hidden><b>הספרייה עדיין ריקה</b>שמרו את הפוסט הראשון: לחצו על <b>+ קישור</b>, או שתפו פוסט מהטלפון אל Saw.</div>
   </main>
   <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>קישור</button>
   <div class="scrim" id="scrim"></div>
+  <div class="sheet fsheet" id="fsheet">
+    <div class="grab"></div>
+    <div class="head"><h2 style="margin:0">סינון</h2><button class="btn ghost" type="button" id="fClear" hidden>ניקוי</button></div>
+    <div class="scroll" id="fBody"></div>
+  </div>
   <form class="sheet" id="sheet" autocomplete="off">
     <div class="grab"></div>
     <h2>שמירת פוסט</h2>

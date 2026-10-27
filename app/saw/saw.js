@@ -11,12 +11,16 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const SYNC_ON = typeof gallabStore === 'function' && /\.gallab\.top$/.test(location.hostname);
 const store = SYNC_ON ? gallabStore('saw', { scope: 'family' }) : null;
 const LOCAL_KEY = 'saw.doc';
+// Cards summarised before this moment were written with the old prompt (invented Hebrew words);
+// they are summarised again, once, the first time they are opened.
+const PROMPT_FIXED_AT = Date.parse('2026-10-27T12:30:00Z');
 
 const TYPE_LABEL = { project: 'פרויקט', technique: 'טכניקה', tool: 'כלי / ג׳יג', material: 'חומר / גימור', inspiration: 'השראה' };
 const PLATFORM_LABEL = { facebook: 'פייסבוק', instagram: 'אינסטגרם', youtube: 'יוטיוב', tiktok: 'טיקטוק', web: 'אתר', manual: '' };
 const PLATFORM_GLYPH = { facebook: 'f', instagram: '◎', youtube: '▶', tiktok: '♪', web: '🪵' };
 const STATUS_LABEL = { saved: 'שמור', want: 'רוצה לבנות', done: 'בניתי' };
 const ICON = {
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.4-7.5 10-7.5 10z"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
@@ -115,7 +119,7 @@ async function enrich(it, text) {
       title: data.title || cur.title, summary: data.summary || cur.summary, type: data.type || cur.type,
       tags: data.tags || [], materials: data.materials || [], tools: data.tools || [], key_points: data.key_points || [],
       difficulty: data.difficulty || '', author: data.author ?? cur.author, thumb: data.thumbnail_url || cur.thumb,
-      platform: data.platform || cur.platform, caption: data.caption || null, duration: data.duration_seconds || null, pending: false, error: null,
+      platform: data.platform || cur.platform, caption: data.caption || null, duration: data.duration_seconds || null, pending: false, error: null, enrichedAt: Date.now(),
     });
     touch(cur);
   } catch (e) {
@@ -128,18 +132,32 @@ async function enrich(it, text) {
 // ---------------------------------------------------------------------------
 // list view
 // ---------------------------------------------------------------------------
-const filter = { type: '', status: '', star: false, tag: '', q: '' };
+// One active filter at a time, like Kort: '' | 'star' | 'want' | 'done' | 'type:<t>' | 'tag:<t>'; plus the search text.
+const filter = { key: '', q: '' };
+const TYPE_PLURAL = { project: 'פרויקטים', technique: 'טכניקות', tool: 'כלים וג׳יגים', material: 'חומרים וגימור', inspiration: 'השראה' };
+function filterLabel(k) {
+  if (!k) return null;
+  if (k === 'star') return 'מועדפים';
+  if (k === 'want' || k === 'done') return STATUS_LABEL[k];
+  if (k.startsWith('type:')) return TYPE_PLURAL[k.slice(5)] || k.slice(5);
+  if (k.startsWith('tag:')) return '#' + k.slice(4);
+  return k;
+}
+function matches(it, k) {
+  if (!k) return true;
+  if (k === 'star') return !!it.star;
+  if (k === 'want' || k === 'done') return it.status === k;
+  if (k.startsWith('type:')) return it.type === k.slice(5);
+  if (k.startsWith('tag:')) return (it.tags || []).includes(k.slice(4));
+  return true;
+}
 function visible() {
   const q = filter.q.trim().toLowerCase();
-  return Object.values(doc.items).filter(it =>
-    (!filter.type || it.type === filter.type) &&
-    (!filter.status || it.status === filter.status) &&
-    (!filter.star || it.star) &&
-    (!filter.tag || (it.tags || []).includes(filter.tag)) &&
+  return Object.values(doc.items).filter(it => matches(it, filter.key) &&
     (!q || [it.title, it.summary, it.notes, it.author, it.caption, ...(it.tags || []), ...(it.materials || []), ...(it.tools || [])].join(' ').toLowerCase().includes(q)),
   ).sort((a, b) => (b.added || 0) - (a.added || 0));
 }
-const anyFilter = () => filter.type || filter.status || filter.star || filter.tag || filter.q.trim();
+const anyFilter = () => filter.key || filter.q.trim();
 function renderList() {
   const items = visible();
   const all = Object.values(doc.items);
@@ -147,18 +165,28 @@ function renderList() {
   $('#empty').hidden = all.length > 0;
   $('#count').textContent = all.length ? (items.length === all.length ? `${all.length} שמורים` : `${items.length} מתוך ${all.length}`) : '';
   $('#clearFilters').hidden = !anyFilter();
-  const TYPE_PLURAL = { project: 'פרויקטים', technique: 'טכניקות', tool: 'כלים וג׳יגים', material: 'חומרים וגימור', inspiration: 'השראה' };
-  $('#secTitle').textContent = filter.tag ? `#${filter.tag}` : filter.type ? TYPE_PLURAL[filter.type] : filter.status ? STATUS_LABEL[filter.status] : filter.star ? 'מועדפים' : 'הספרייה';
-  const counts = {}; for (const it of all) for (const t of it.tags || []) counts[t] = (counts[t] || 0) + 1;
-  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 20);
-  const tc = $('#tagChips');
-  tc.hidden = top.length === 0;
-  tc.innerHTML = top.map(([t]) => `<button class="chip tag" data-tag="${esc(t)}" aria-pressed="${filter.tag === t}">#${esc(t)}</button>`).join('');
-  $$('#typeChips .chip[data-type]').forEach(c => c.setAttribute('aria-pressed', c.dataset.type === filter.type));
-  $$('#typeChips .chip[data-status]').forEach(c => c.setAttribute('aria-pressed', c.dataset.status === filter.status));
-  $('#starFilter').setAttribute('aria-pressed', filter.star);
+  $('#secTitle').textContent = filterLabel(filter.key) || 'הספרייה';
   $('#clearSearch').hidden = !filter.q;
+  $('#filterBtn').setAttribute('aria-pressed', !!filter.key);
+  const af = $('#activeFilter'); af.hidden = !filter.key;
+  if (filter.key) { $('#activeChip').textContent = filterLabel(filter.key); $('#activeCount').textContent = `${items.length} פריטים`; }
+  renderFilterSheet();
 }
+function renderFilterSheet() {
+  const all = Object.values(doc.items);
+  const types = Object.keys(TYPE_LABEL).filter(t => all.some(it => it.type === t));
+  const counts = {}; for (const it of all) for (const t of it.tags || []) counts[t] = (counts[t] || 0) + 1;
+  const tags = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 24).map(([t]) => t);
+  const chip = (k, label, extra = '') => `<button class="chip ${extra}" data-key="${esc(k)}" aria-pressed="${filter.key === k}">${label}</button>`;
+  $('#fBody').innerHTML = `
+    <div class="grp"><b>מהיר</b><div class="wrap">${chip('', 'הכול')}${chip('star', ICON.heart + ' מועדפים', 'withico')}${chip('want', 'רוצה לבנות')}${chip('done', 'בניתי')}</div></div>
+    ${types.length ? `<div class="grp"><b>סוג</b><div class="wrap">${types.map(t => chip('type:' + t, TYPE_PLURAL[t])).join('')}</div></div>` : ''}
+    ${tags.length ? `<div class="grp"><b>תגיות</b><div class="wrap">${tags.map(t => chip('tag:' + t, '#' + esc(t), 'tag')).join('')}</div></div>` : ''}`;
+  $('#fClear').hidden = !filter.key;
+}
+function setFilter(k) { filter.key = k; closeFilter(); renderList(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function openFilter() { renderFilterSheet(); $('#fsheet').classList.add('open'); $('#scrim').classList.add('open'); }
+function closeFilter() { $('#fsheet').classList.remove('open'); if (!$('#sheet').classList.contains('open')) $('#scrim').classList.remove('open'); }
 function thumbHtml(it, cls = '') {
   const glyph = PLATFORM_GLYPH[it.platform] || '🪵';
   return it.thumb
@@ -171,7 +199,7 @@ function card(it, featured) {
     ${thumbHtml(it)}
     <div class="shade"></div>
     ${it.status && it.status !== 'saved' ? `<span class="pill" data-s="${it.status}">${STATUS_LABEL[it.status]}</span>` : ''}
-    <button class="star" aria-pressed="${!!it.star}" data-star="${it.id}" title="מועדף">★</button>
+    <button class="heart" aria-pressed="${!!it.star}" data-star="${it.id}" title="מועדף">${ICON.heart}</button>
     <div class="text">
       ${featured && it.type ? `<span class="typepill">${TYPE_LABEL[it.type] || ''}</span>` : ''}
       <h3>${esc(title)}</h3>
@@ -189,8 +217,16 @@ let openId = null, tab = 'points';
 function openDetail(id) {
   if (!doc.items[id]) return;
   openId = id; tab = 'points';
+  refreshIfStale(doc.items[id]);
   if (location.hash !== '#i=' + id) history.pushState({ saw: id }, '', '#i=' + id);
   renderDetail();
+}
+function refreshIfStale(it) {
+  if (it.pending || it.error) return;
+  if ((it.enrichedAt || 0) >= PROMPT_FIXED_AT) return;
+  if (!it.summary && !it.title) return;
+  it.enrichedAt = PROMPT_FIXED_AT; // only once, even if the call fails
+  enrich(it, null);
 }
 function closeDetail(viaHistory) {
   openId = null;
@@ -233,7 +269,7 @@ function renderDetail() {
       <div class="herobar">
         <button class="cbtn" id="dBack" title="חזרה">${ICON.back}</button>
         <span class="sp"></span>
-        <button class="cbtn ${it.star ? 'on' : ''}" id="dStar" title="מועדף">★</button>
+        <button class="cbtn ${it.star ? 'on' : ''}" id="dStar" title="מועדף">${ICON.heart}</button>
         <button class="cbtn" id="dMore" title="עוד">${ICON.more}</button>
       </div>
       ${isVideo ? `<a class="play" href="${esc(it.url)}" target="_blank" rel="noopener" title="פתח את הסרטון">${ICON.play}</a>` : ''}
@@ -270,7 +306,7 @@ function renderDetail() {
   $('#mCopy').onclick = async () => { try { await navigator.clipboard.writeText(it.url); toast('הקישור הועתק'); } catch { prompt('הקישור:', it.url); } };
   $('#mDelete').onclick = () => { if (confirm(`למחוק "${it.title || it.url}" מהספרייה?`)) { closeDetail(); removeItem(it.id); } };
   $$('.statusrow .chip', d).forEach(b => b.onclick = () => { it.status = b.dataset.status; touch(it); });
-  $$('.dtags button', d).forEach(b => b.onclick = () => { filter.tag = b.dataset.tag; closeDetail(); renderList(); window.scrollTo(0, 0); });
+  $$('.dtags button', d).forEach(b => b.onclick = () => { closeDetail(); setFilter('tag:' + b.dataset.tag); });
   $$('.tabs button', d).forEach(b => b.onclick = () => { tab = b.dataset.tab; renderDetail(); });
   const notes = $('#notesInput'); if (notes) { let t; notes.oninput = () => { clearTimeout(t); t = setTimeout(() => { it.notes = notes.value.trim(); it.updated = Date.now(); persistLocal(); if (store) { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1200); } }, 500); }; }
 }
@@ -317,26 +353,22 @@ function openEdit(it) {
 // add sheet + wiring
 // ---------------------------------------------------------------------------
 function openSheet() { $('#sheet').classList.add('open'); $('#scrim').classList.add('open'); setTimeout(() => $('#urlInput').focus(), 250); }
-function closeSheet() { $('#sheet').classList.remove('open'); $('#scrim').classList.remove('open'); hideErr(); }
+function closeSheet() { $('#sheet').classList.remove('open'); if (!$('#fsheet').classList.contains('open')) $('#scrim').classList.remove('open'); hideErr(); }
 function showErr(msg) { const el = $('#addErr'); el.textContent = msg; el.hidden = false; if (!$('#sheet').classList.contains('open')) openSheet(); }
 function hideErr() { $('#addErr').hidden = true; }
 let toastTimer; function toast(msg) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 2500); }
 
 $('#fab').onclick = openSheet;
-$('#scrim').onclick = closeSheet;
+$('#scrim').onclick = () => { closeSheet(); closeFilter(); };
 $('#sheet').onsubmit = e => { e.preventDefault(); addLink($('#urlInput').value, $('#textInput').value.trim() || null); };
 $('#toggleText').onclick = () => { const t = $('#textInput'); t.hidden = !t.hidden; if (!t.hidden) t.focus(); };
 $('#search').oninput = e => { filter.q = e.target.value; renderList(); };
 $('#clearSearch').onclick = () => { $('#search').value = ''; filter.q = ''; renderList(); };
-$('#starFilter').onclick = () => { filter.star = !filter.star; renderList(); };
-$('#clearFilters').onclick = () => { Object.assign(filter, { type: '', status: '', star: false, tag: '', q: '' }); $('#search').value = ''; renderList(); };
-$('#typeChips').onclick = e => {
-  const b = e.target.closest('.chip'); if (!b) return;
-  if (b.dataset.type !== undefined) { filter.type = b.dataset.type; filter.status = ''; }
-  if (b.dataset.status) { filter.status = filter.status === b.dataset.status ? '' : b.dataset.status; filter.type = ''; }
-  renderList();
-};
-$('#tagChips').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; filter.tag = filter.tag === b.dataset.tag ? '' : b.dataset.tag; renderList(); };
+$('#filterBtn').onclick = openFilter;
+$('#fClear').onclick = () => setFilter('');
+$('#fBody').onclick = e => { const b = e.target.closest('.chip'); if (b) setFilter(b.dataset.key); };
+$('#activeChip').onclick = () => setFilter('');
+$('#clearFilters').onclick = () => { filter.q = ''; $('#search').value = ''; setFilter(''); };
 $('#grid').onclick = e => {
   const star = e.target.closest('[data-star]'); if (star) { e.stopPropagation(); const it = doc.items[star.dataset.star]; if (it) { it.star = !it.star; touch(it); } return; }
   const open = e.target.closest('[data-open]'); if (open) openDetail(open.dataset.open);
