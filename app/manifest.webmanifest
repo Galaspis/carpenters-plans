@@ -10,8 +10,30 @@
   "background_color": "#F7F7F6",
   "theme_color": "#F7F7F6",
   "icons": [
-    { "src": "brand/app-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "brand/app-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "brand/woody-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+    {
+      "src": "brand/app-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "brand/app-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "brand/woody-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./saw/",
+    "method": "GET",
+    "params": {
+      "url": "url",
+      "text": "text",
+      "title": "title"
+    }
+  }
 }

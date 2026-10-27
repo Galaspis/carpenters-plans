@@ -53,6 +53,18 @@ Projects sync through the hub's document store (one shared JSON document, newer
 change wins per key) with a copy in the browser for offline use; a backup / restore
 to a file is also built in (`app/js/app.js`, `setupBackup`).
 
+## Saw — saved posts and videos (`app/saw/`)
+
+`woody.gallab.top/saw` is a small library of woodworking posts found on Facebook,
+Instagram, YouTube, TikTok or blogs. Paste a link (or, on the phone, share the post
+to Woody: the manifest's `share_target` opens `/saw/?url=…`) and the page asks
+Kort's importer (`POST /api/saw/enrich`, proxied by `deploy/woody.caddy` to Kort on
+port 8787) for the caption, a thumbnail copy and a short Hebrew summary with type,
+tags, materials, tools and key points. Only links are kept, never the video. Cards
+can be edited, tagged, starred, marked "want to build" / "built", filtered and
+searched. The library is one shared family document in the hub store
+(`/api/family/saw`); when two devices disagree the newer item wins.
+
 Built-in designs (`app/designs/index.json`):
 
 | id | name |

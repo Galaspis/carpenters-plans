@@ -13,7 +13,7 @@ $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
 # --- 1. checks ---
-Get-ChildItem app\js\*.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { throw "syntax error in $($_.Name)" } }
+Get-ChildItem app\js\*.js, app\saw\*.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { throw "syntax error in $($_.Name)" } }
 $env:QUIET = '1'; node app\test\run.mjs | Select-Object -Last 1
 if ($LASTEXITCODE -ne 0) { throw 'design tests FAILED - not deploying' }
 Write-Host '[1/5] checks OK' -ForegroundColor Green

@@ -34,6 +34,7 @@
   header .hbtn:hover { background:var(--soft); border-color:var(--line); }
   header .hbtn.crest { background:var(--accent); color:#fff; font-weight:700; }
   header .hbtn[hidden] { display:none; }
+  header a.hbtn { text-decoration:none; }
   .syncdot { width:10px; height:10px; border-radius:50%; background:var(--ok); margin-inline-start:4px; flex:none; } .syncdot[data-state=off] { background:var(--muted); } .syncdot[hidden] { display:none; }
 
   /* ---- stepper: dots on a line ---- */
@@ -263,12 +264,13 @@
   <img class="logo" id="homeBtn" src="brand/woody-header.svg" alt="Woody" title="הפרויקטים שלי">
   <span class="pname" id="crumb"></span>
   <span class="hgroup">
+    <a class="hbtn" href="saw/" title="Saw — פוסטים וסרטונים ששמרתם"><img class="ic" src="brand/icons/cutting.svg" alt=""><span class="t">Saw</span></a>
     <button class="hbtn" id="yardBtn"><img class="ic" src="brand/icons/wood.svg" alt=""><span class="t">המחסן שלי</span></button>
     <button class="hbtn crest" id="sendToWebBtn" hidden><img class="ic" src="brand/icons/export.svg" alt=""><span class="t">העבר הכל לאתר</span></button>
     <button class="hbtn" id="backupBtn" title="גיבוי לקובץ"><img class="ic" src="brand/icons/save.svg" alt=""><span class="t">גיבוי</span></button>
     <button class="hbtn" id="restoreBtn" title="שחזור מקובץ"><img class="ic" src="brand/icons/project-open.svg" alt=""><span class="t">שחזור</span></button>
     <input type="file" id="restoreFile" accept=".json" hidden>
-    <span id="ver" hidden>v55</span>
+    <span id="ver" hidden>v56</span>
   </span>
   <div id="printMenu" class="printmenu" hidden>
     <b>מה להדפיס?</b>

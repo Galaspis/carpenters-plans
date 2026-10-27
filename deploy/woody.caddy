@@ -1,7 +1,7 @@
 # Woody (Carpenter's Plans). Install as /etc/caddy/sites/woody.caddy, then: sudo systemctl reload caddy
 # Static PWA, behind the shared Google login. Mirrors the earlier static-hosting rules:
 # clean URLs, no-cache for the app files (so phones pick up new versions), immutable vendor/.
-# "import datastore" gives the app the hub's document store at /api/family/woody (shared) and /api/data/woody (per person).
+# "import datastore" gives the app the hub's document store at /api/family/woody and /api/family/saw (shared) and /api/data/woody (per person).
 woody.gallab.top {
     encode zstd gzip
     header {
@@ -29,6 +29,12 @@ woody.gallab.top {
 
         import auth
         import datastore
+
+        # Saw (woody.gallab.top/saw): link enrichment runs in Kort's server, which already reads
+        # Facebook/Instagram posts. Same login, same Remote-Email; Kort keeps nothing in its database.
+        handle /api/saw/* {
+            reverse_proxy 127.0.0.1:8787
+        }
 
         root * /srv/woody/site
         @app path *.html *.js *.json *.webmanifest /sw.js

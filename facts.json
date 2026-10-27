@@ -5,6 +5,8 @@
  "hosting": "OVH VPS (static, Caddy)",
  "domain": "woody.gallab.top",
  "url": "https://woody.gallab.top",
- "services": [],
+ "services": [
+  "Claude API"
+ ],
  "banned": []
 }
