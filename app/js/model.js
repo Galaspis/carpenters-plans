@@ -15,6 +15,8 @@ export function autoMapProfiles(design, catalog, current = {}) {
       const [t, w] = [Math.min(l.t, l.w), Math.max(l.t, l.w)];
       let score = Math.abs(t - p.t) * 2 + Math.abs(w - p.w);
       if (l.lastUsed) score -= 8; // buying history: a section you already bought wins a near tie
+      const treated = l.treated || /מטופל|אימפרגנצ|impreg|treated/i.test(l.name || '');
+      if (p.treated) score += treated ? -20 : 60; // outdoor profiles want pressure-treated wood; plain pine only as a last resort
       if (score < bestScore) { bestScore = score; best = l; }
     }
     map[key] = best ? best.id : null;

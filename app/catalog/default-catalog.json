@@ -14,7 +14,8 @@
         3000,
         3600
       ],
-      "pricePerMeter": 22
+      "pricePerMeter": 22,
+      "treated": true
     },
     {
       "id": "pine_45x95",
@@ -109,7 +110,8 @@
         3000,
         3600
       ],
-      "pricePerMeter": 34
+      "pricePerMeter": 34,
+      "treated": true
     },
     {
       "id": "pine_45x145",
@@ -147,6 +149,35 @@
         3300
       ],
       "pricePerMeter": 4
+    },
+    {
+      "id": "pine_t_45x145",
+      "name": "קורת אורן מטופל (אימפרגנציה)",
+      "t": 45,
+      "w": 145,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800,
+        5400
+      ],
+      "pricePerMeter": 30,
+      "treated": true
+    },
+    {
+      "id": "pine_t_45x70",
+      "name": "קורת אורן מטופל (אימפרגנציה)",
+      "t": 45,
+      "w": 70,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800
+      ],
+      "pricePerMeter": 15,
+      "treated": true
     }
   ],
   "hardware": {
