@@ -82,7 +82,7 @@ export function buildModel(design, values, catalog, mapping, spaces) {
       if (size.some(v => v <= 0)) { warnings.push(`התנגשות: לחלק "${def.name}" #${i + 1} יש מידה אפס או שלילית [${size.map(r).join(', ')}]`); continue; }
       let ax = assignAxes(size, prof.t, prof.w);
       if (!ax) {
-        warnings.push(`החלק "${def.name}" [${size.map(r).join('×')}] לא מתאים לחתך העץ ${prof.t}×${prof.w}`);
+        if (!def.illustration) warnings.push(`החלק "${def.name}" [${size.map(r).join('×')}] לא מתאים לחתך העץ ${prof.t}×${prof.w}`);
         const idx = [0, 1, 2].sort((a, b) => size[a] - size[b]);
         ax = { T: idx[0], W: idx[1], L: idx[2] };
       }

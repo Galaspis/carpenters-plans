@@ -1,12 +1,12 @@
 {
   "id": "pergola-leanto",
   "name": "פרגולה צמודה לקיר עם גג פוליקרבונט",
-  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית.",
+  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית. במודל מופיעים באפור, להמחשה בלבד: הקיר, הדלת, הריצוף, המרפסת העגולה שמעל (לפי המידות שתזין) ויריעת הגג — כדי לראות שהגג עובר מתחת למרפסת ומגיע מעבר לקצה שלה.",
   "category": "גינה",
   "units": "mm",
   "view": {
-    "azimuth": 30,
-    "elevation": 22
+    "azimuth": -35,
+    "elevation": 18
   },
   "spaces": [
     {
@@ -48,6 +48,24 @@
       "label": "בסיסי עמוד (מתכת)",
       "t": 3,
       "w": 100,
+      "hardware": true
+    },
+    "wallP": {
+      "label": "הקיר (להמחשה)",
+      "t": 200,
+      "w": 200,
+      "hardware": true
+    },
+    "slab": {
+      "label": "מרפסת / ריצוף (להמחשה)",
+      "t": 200,
+      "w": 200,
+      "hardware": true
+    },
+    "sheet": {
+      "label": "יריעת פוליקרבונט (להמחשה)",
+      "t": 16,
+      "w": 1050,
       "hardware": true
     }
   },
@@ -119,6 +137,46 @@
       "min": 0,
       "max": 400,
       "step": 10
+    },
+    {
+      "id": "balcX",
+      "label": "להמחשה: מרכז המרפסת העגולה מהקצה השמאלי (מ\"מ)",
+      "value": 1700,
+      "min": 0,
+      "max": 7000,
+      "step": 50
+    },
+    {
+      "id": "balcR",
+      "label": "להמחשה: רדיוס המרפסת (מ\"מ)",
+      "value": 1600,
+      "min": 500,
+      "max": 3000,
+      "step": 50
+    },
+    {
+      "id": "balcZ",
+      "label": "להמחשה: גובה תחתית המרפסת (מ\"מ)",
+      "value": 2600,
+      "min": 2000,
+      "max": 4000,
+      "step": 50
+    },
+    {
+      "id": "doorX",
+      "label": "להמחשה: הדלת — מהקצה השמאלי (מ\"מ)",
+      "value": 690,
+      "min": 0,
+      "max": 7000,
+      "step": 10
+    },
+    {
+      "id": "pavD",
+      "label": "להמחשה: עומק הריצוף מהקיר (מ\"מ)",
+      "value": 1660,
+      "min": 500,
+      "max": 4000,
+      "step": 10
     }
   ],
   "derived": {
@@ -133,7 +191,9 @@
     "postX0": "sideOver",
     "postStep": "nPosts > 1 ? (W - 2*sideOver - post_t) / (nPosts - 1) : 0",
     "sheets": "ceil(W / 1050)",
-    "sheetLen": "ceil(rafterLen / 100) * 100 + 100"
+    "sheetLen": "ceil(rafterLen / 100) * 100 + 100",
+    "wallY": "D",
+    "nSeg": "10"
   },
   "dims": [
     {
@@ -261,6 +321,114 @@
         "purlin_w",
         "purlin_t"
       ]
+    },
+    {
+      "id": "paving",
+      "name": "הריצוף (להמחשה)",
+      "profile": "slab",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "0",
+        "wallY - pavD",
+        "-150"
+      ],
+      "size": [
+        "W",
+        "pavD",
+        "150"
+      ]
+    },
+    {
+      "id": "wall",
+      "name": "קיר הבית (להמחשה)",
+      "profile": "wallP",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "-300",
+        "wallY",
+        "-150"
+      ],
+      "size": [
+        "W + 600",
+        "200",
+        "balcZ + 1400"
+      ]
+    },
+    {
+      "id": "door",
+      "name": "הדלת (להמחשה)",
+      "profile": "wallP",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "doorX",
+        "wallY - 20",
+        "0"
+      ],
+      "size": [
+        "900",
+        "20",
+        "2100"
+      ]
+    },
+    {
+      "id": "balc",
+      "name": "המרפסת העגולה (להמחשה)",
+      "profile": "slab",
+      "count": "nSeg",
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "balcX - balcR*(i+1)/nSeg",
+        "wallY - balcR*sqrt(1 - ((i+0.5)/nSeg)*((i+0.5)/nSeg))",
+        "balcZ"
+      ],
+      "size": [
+        "2*balcR*(i+1)/nSeg",
+        "balcR*sqrt(1 - ((i+0.5)/nSeg)*((i+0.5)/nSeg))",
+        "200"
+      ]
+    },
+    {
+      "id": "balcRail",
+      "name": "מעקה המרפסת (להמחשה)",
+      "profile": "wallP",
+      "count": "2*nSeg",
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "balcX + (i < nSeg ? balcR*(i % nSeg)/nSeg : -balcR*((i % nSeg)+1)/nSeg)",
+        "wallY - balcR*sqrt(1 - (((i % nSeg)+0.5)/nSeg)*(((i % nSeg)+0.5)/nSeg))",
+        "balcZ + 200"
+      ],
+      "size": [
+        "balcR/nSeg",
+        "30",
+        "1000"
+      ]
+    },
+    {
+      "id": "sheetP",
+      "name": "יריעת הפוליקרבונט (להמחשה)",
+      "profile": "sheet",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "-30",
+        "0",
+        "beamZ + beam_w + purlin_t"
+      ],
+      "size": [
+        "W + 60",
+        "D - beam_t + 50",
+        "16"
+      ]
     }
   ],
   "joints": [
@@ -304,6 +472,336 @@
     {
       "a": "rafter",
       "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "balcRail",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "balcRail",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "balc",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "balcRail",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "door",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "balcRail",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "sheetP",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "balcRail",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "paving",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "balcRail",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "wall",
+      "b": "paving",
       "method": "none"
     }
   ],
