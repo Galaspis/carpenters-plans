@@ -96,7 +96,7 @@ export function createViewer(container, opts = {}) {
       const size = x.size, mid = x.min.map((v, k) => v + size[k] / 2 + off[k]);
       const isHL = highlight.has(x.uid), isGhost = ghost.has(x.uid) || x.existing;
       const geo = new THREE.BoxGeometry(size[0], size[2], size[1]);
-      const mesh = new THREE.Mesh(geo, x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? 0.45 : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
+      const mesh = new THREE.Mesh(geo, x.def?.glass ? new THREE.MeshLambertMaterial({ color: isHL ? 0xbfd8e8 : 0xdde9f0, transparent: true, opacity: 0.45 }) : x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? 0.45 : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
       mesh.position.copy(toThree(mid)); group.add(mesh);
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: isGhost ? COL.ghostEdge : COL.edge, transparent: isGhost, opacity: isGhost ? 0.5 : 1 }));
       edges.position.copy(mesh.position); group.add(edges);

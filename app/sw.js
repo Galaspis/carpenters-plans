@@ -1,6 +1,6 @@
 // Offline cache: the whole app shell is cached on first visit; later visits work without reception.
 // Network-first for app files (so updates arrive when online), cache-first for the big vendor libs.
-const VERSION = 'cp-v66';
+const VERSION = 'cp-v67';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './brand/favicon.svg',
   './brand/woody-header.svg', './brand/favicon.svg', './brand/fonts/Heebo.ttf', './brand/fonts/NunitoSans.ttf',

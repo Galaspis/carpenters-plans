@@ -4,7 +4,7 @@ export function buildSteps(design, model, joints) {
   const byDef = {};
   for (const x of model.instances) (byDef[x.def.id] ||= []).push(x);
   // existing parts (another piece of furniture) are visible from the start; joints to them wait for the step that names them
-  const placed = new Set(model.instances.filter(x => x.existing).map(x => x.uid));
+  const placed = new Set(model.instances.filter(x => x.existing && !x.def.contextOnly).map(x => x.uid)); // context-only parts (e.g. a balcony) show in the overview, not in the steps
   const steps = [];
   const usedJoints = new Set();
   const toExisting = j => j.a.existing || j.b.existing;

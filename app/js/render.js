@@ -5,6 +5,7 @@ const WOOD = { top: '#e4c08f', front: '#d9b17c', side: '#b8905c', edge: '#202125
 const HL = { top: '#ff8d6e', front: '#f4512e', side: '#c93f22', edge: '#202125' };
 const GHOST = { top: '#f2f3f4', front: '#e6e7e9', side: '#d7d9dc', edge: '#c4c7cb' };
 const METAL = { top: '#8a8f94', front: '#6b7075', side: '#55595d', edge: '#2b2e31' };
+const GLASS = { top: '#e6eef3', front: '#d5e1e9', side: '#c4d3dd', edge: '#8fa3b0' };
 const FONT = 'font-family="Arial, Helvetica, sans-serif"';
 
 export function makeProjection(view = {}) {
@@ -117,7 +118,7 @@ export function iso(instances, opts = {}) {
   const faces = [];
   for (const i of order) {
     const { inst: x, min, max } = boxes[i];
-    const pal = highlight.has(x.uid) ? (x.hardware ? { ...METAL, edge: '#000' } : HL) : (ghost.has(x.uid) || x.existing) ? GHOST : x.hardware ? METAL : WOOD;
+    const pal = x.def?.glass ? (highlight.has(x.uid) ? { ...GLASS, edge: '#f4512e' } : GLASS) : highlight.has(x.uid) ? (x.hardware ? { ...METAL, edge: '#000' } : HL) : (ghost.has(x.uid) || x.existing) ? GHOST : x.hardware ? METAL : WOOD;
     for (const [name, f] of Object.entries(boxFaces(min, max))) {
       const facing = f.n[0] * dir[0] + f.n[1] * dir[1] + f.n[2] * dir[2];
       if (facing <= 0) continue;
