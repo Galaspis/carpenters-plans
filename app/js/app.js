@@ -850,7 +850,7 @@ function renderAssembly() {
     const byNo = {};
     for (const x of r.model.instances) if (s.highlight.has(x.uid)) byNo[x.partNo] = (byNo[x.partNo] || 0) + 1;
     html += `<div class="card"><div class="step"><div>
-        <h3><span class="num">${s.n}</span>${esc(s.title)}</h3><p>${esc(s.text)}</p>
+        <h3><span class="num">${s.n}</span>${esc(s.title)}</h3><p style="white-space:pre-line">${esc(s.text)}</p>
         ${Object.keys(byNo).length ? `<div>${Object.entries(byNo).map(([no, n]) => `<span class="pill"><b>#${no}</b> ${esc(r.groups[no - 1]?.name || '')} ×${n}</span>`).join('')}</div>` : ''}
         ${Object.keys(s.screws).length ? `<p style="font-size:13px">${Object.entries(s.screws).map(([k, n]) => `${screwIcon(...k.split('×'))} ×${n}`).join('')}</p>` : ''}
         ${s.tip ? `<p class="tip">💡 ${esc(s.tip)}</p>` : ''}
