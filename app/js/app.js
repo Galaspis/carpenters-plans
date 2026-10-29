@@ -365,6 +365,14 @@ function showStep(id) {
 // The measured place: the design's "spaces" fields, plus any param marked place:true (the surroundings:
 // door, balcony, paving...). Designs with placeDims also get a 3D view of the area, drawn from the
 // parts marked existing + illustration, with the measures as dimension lines.
+// "מדדתי" tick on every field the user has to measure on site; remembered per project
+function measureTick(row, key) {
+  const done = new Set(per('measured', []));
+  row.classList.add('chk'); if (done.has(key)) row.classList.add('done');
+  const lab = document.createElement('label'); lab.className = 'm'; lab.innerHTML = `<input type="checkbox" ${done.has(key) ? 'checked' : ''}> מדדתי`;
+  lab.querySelector('input').onchange = e => { const d = new Set(per('measured', [])); e.target.checked ? d.add(key) : d.delete(key); setPer('measured', [...d]); row.classList.toggle('done', e.target.checked); };
+  row.appendChild(lab);
+}
 function renderSpaces() {
   const box = $('#spaces'); box.innerHTML = '';
   const specs = state.design.spaces || [];
@@ -380,13 +388,15 @@ function renderSpaces() {
   for (const sp of specs) {
     if (placeParams.length) box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(sp.label || 'המקום')}</h4>`);
     for (const [f, def] of Object.entries(sp.fields)) {
-      box.appendChild(field(placeParams.length ? def.label : (NICE[f] || def.label), state.spaces?.[sp.id]?.[f] ?? def.value, 'step="10"', v => { (state.spaces[sp.id] ||= {})[f] = v; fitToSpace(false, false); recompute(); }));
+      const row = field(placeParams.length ? def.label : (NICE[f] || def.label), state.spaces?.[sp.id]?.[f] ?? def.value, 'step="10"', v => { (state.spaces[sp.id] ||= {})[f] = v; fitToSpace(false, false); recompute(); });
+      measureTick(row, `space:${sp.id}:${f}`); box.appendChild(row);
     }
   }
   let group = null;
   for (const p of placeParams) {
     if (p.group && p.group !== group) { group = p.group; box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(group)}</h4>`); }
-    box.appendChild(field(p.label, state.values[p.id] ?? p.value, `min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 1}"`, v => { if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; recompute(); } }));
+    const row = field(p.label, state.values[p.id] ?? p.value, `min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 1}"`, v => { if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; recompute(); } });
+    if (p.measure) measureTick(row, `param:${p.id}`); box.appendChild(row);
   }
   mountSpaceView();
 }
@@ -437,8 +447,10 @@ const isBool = p => p.min === 0 && p.max === 1 && (p.step ?? 1) === 1;
 function renderParams() {
   const box = $('#params'); if (!box) return; box.innerHTML = '';
   const manual = manualSet();
+  let group = null;
   for (const p of state.design.params) {
     if (p.place) continue;
+    if (p.group && p.group !== group) { group = p.group; box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(group)}</h4>`); }
     const label = p.label.replace(/\s*\((1 = כן, 0 = לא|0 = [^)]*)\)\s*$/, '');
     if (p.showIf) { try { if (!evalExpr(p.showIf, { ...state.values })) continue; } catch {} }
     if (p.options) {
@@ -461,6 +473,7 @@ function renderParams() {
     inp.oninput = e => { const v = +e.target.value; if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; setManual(p.id, true); recompute(); } };
     inp.onchange = () => renderParams();
     const s = row.querySelector('.suggest'); if (s) s.onclick = () => { state.values[p.id] = sug; setManual(p.id, false); renderParams(); recompute(); };
+    if (p.measure) measureTick(row, `param:${p.id}`);
     box.appendChild(row);
   }
   const reset = document.createElement('button'); reset.className = 'btn small ghost'; reset.style.marginTop = '8px'; reset.textContent = '↺ חזרה למידות המומלצות למקום';

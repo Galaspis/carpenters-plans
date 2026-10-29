@@ -176,6 +176,9 @@
   .viewer3d { position:relative; height:520px; background:var(--canvas); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden; direction:ltr; }
   .viewer3d.small { height:380px; }
   #spaces h4.grp { margin:16px 0 6px; font-size:14px; color:var(--muted); font-weight:700; } #spaces h4.grp:first-child { margin-top:0; }
+  #params h4.grp { margin:16px 0 6px; font-size:14px; color:var(--muted); font-weight:700; } #params h4.grp:first-child { margin-top:0; }
+  .field.chk { grid-template-columns: 1fr 130px auto; } .field.chk label.m { font-size:12px; color:var(--muted); display:flex; gap:4px; align-items:center; white-space:nowrap; cursor:pointer; } .field.chk label.m input { width:18px; height:18px; }
+  .field.chk.done label.m { color:var(--ok); font-weight:700; } .field.chk.done input[type=number] { border-color:#bfe3cd; background:#f0faf3; }
   .viewer3d .hint { position:absolute; left:10px; bottom:8px; font-size:12px; color:var(--muted); background:rgba(255,255,255,.85); padding:2px 8px; border-radius:10px; pointer-events:none; direction:rtl; }
   .viewer3d .lbl { position:absolute; transform:translate(-50%,-50%); background:rgba(255,255,255,.94); border:1.5px solid var(--ink); border-radius:10px; padding:1px 7px; font-size:12px; font-weight:bold; color:var(--ink); pointer-events:none; white-space:nowrap; font-family:'Nunito Sans', sans-serif; }
   .viewer3d .lbl.num { border-radius:50%; width:24px; height:24px; padding:0; line-height:21px; text-align:center; }
@@ -226,7 +229,7 @@
     .step-nav { flex-direction:column-reverse; align-items:stretch; } .step-nav .btn { width:100%; }
     .step-nav span:empty { display:none; }
     .card { padding:16px 14px; }
-    .field { grid-template-columns: 1fr 110px; }
+    .field { grid-template-columns: 1fr 110px; } .field.chk { grid-template-columns: 1fr 100px auto; }
     nav.tabs { overflow-x:auto; flex-wrap:nowrap; width:100%; }
     nav.tabs button { min-width:76px; font-size:13px; }
     .toolbar .sp { display:none; } .toolbar .btn { flex:1; }
@@ -271,7 +274,7 @@
     <button class="hbtn" id="backupBtn" title="גיבוי לקובץ"><img class="ic" src="brand/icons/save.svg" alt=""><span class="t">גיבוי</span></button>
     <button class="hbtn" id="restoreBtn" title="שחזור מקובץ"><img class="ic" src="brand/icons/project-open.svg" alt=""><span class="t">שחזור</span></button>
     <input type="file" id="restoreFile" accept=".json" hidden>
-    <span id="ver" hidden>v69</span>
+    <span id="ver" hidden>v70</span>
   </span>
   <div id="printMenu" class="printmenu" hidden>
     <b>מה להדפיס?</b>

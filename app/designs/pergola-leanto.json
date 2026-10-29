@@ -11,7 +11,7 @@
   "spaces": [
     {
       "id": "wall",
-      "label": "המקום: הקיר והשטח שלפניו",
+      "label": "מה למדוד בקיר (3 מידות)",
       "fields": {
         "width": {
           "label": "אורך הקיר הפנוי (מ\"מ)",
@@ -101,7 +101,8 @@
       "fit": true,
       "fitStage": 1,
       "suggest": "snap(min(7000, wall_width - 100), 50)",
-      "suggestNote": "אורך הקיר הפנוי פחות 100 מ\"מ"
+      "suggestNote": "אורך הקיר הפנוי פחות 100 מ\"מ",
+      "group": "מידות הפרגולה"
     },
     {
       "id": "D",
@@ -113,7 +114,8 @@
       "fit": true,
       "fitStage": 1,
       "suggest": "snap(min(4000, wall_depth - 200), 50)",
-      "suggestNote": "העומק הפנוי פחות 200 מ\"מ"
+      "suggestNote": "העומק הפנוי פחות 200 מ\"מ",
+      "group": "מידות הפרגולה"
     },
     {
       "id": "H",
@@ -125,7 +127,8 @@
       "fit": true,
       "fitStage": 1,
       "suggest": "snap(min(3000, wall_height - 125 - beam_w - purlin_t - 60), 50)",
-      "suggestNote": "הגובה בקיר פחות השיפוע (125), הקורה, המרישים ומרווח"
+      "suggestNote": "הגובה בקיר פחות השיפוע (125), הקורה, המרישים ומרווח",
+      "group": "מידות הפרגולה"
     },
     {
       "id": "spacing",
@@ -133,7 +136,8 @@
       "value": 650,
       "min": 400,
       "max": 900,
-      "step": 50
+      "step": 50,
+      "group": "הגדרות בנייה — ברירות המחדל טובות"
     },
     {
       "id": "pspacing",
@@ -141,7 +145,8 @@
       "value": 600,
       "min": 400,
       "max": 1000,
-      "step": 50
+      "step": 50,
+      "group": "הגדרות בנייה — ברירות המחדל טובות"
     },
     {
       "id": "overhang",
@@ -149,7 +154,8 @@
       "value": 200,
       "min": 0,
       "max": 500,
-      "step": 10
+      "step": 10,
+      "group": "הגדרות בנייה — ברירות המחדל טובות"
     },
     {
       "id": "sideOver",
@@ -157,7 +163,8 @@
       "value": 150,
       "min": 0,
       "max": 400,
-      "step": 10
+      "step": 10,
+      "group": "הגדרות בנייה — ברירות המחדל טובות"
     },
     {
       "id": "wallOff",
@@ -167,7 +174,8 @@
       "max": 3000,
       "step": 10,
       "place": true,
-      "group": "הקיר"
+      "group": "הקיר — מה שיש בשטח (להמחשה, לא משפיע על העץ)",
+      "measure": true
     },
     {
       "id": "doorX",
@@ -177,7 +185,8 @@
       "max": 7000,
       "step": 10,
       "place": true,
-      "group": "הדלת"
+      "group": "הדלת",
+      "measure": true
     },
     {
       "id": "doorW",
@@ -187,7 +196,8 @@
       "max": 2500,
       "step": 10,
       "place": true,
-      "group": "הדלת"
+      "group": "הדלת",
+      "measure": true
     },
     {
       "id": "doorH",
@@ -197,7 +207,8 @@
       "max": 2600,
       "step": 10,
       "place": true,
-      "group": "הדלת"
+      "group": "הדלת",
+      "measure": true
     },
     {
       "id": "balcX",
@@ -207,7 +218,8 @@
       "max": 7000,
       "step": 50,
       "place": true,
-      "group": "המרפסת שמעל"
+      "group": "המרפסת העגולה שמעל",
+      "measure": true
     },
     {
       "id": "balcR",
@@ -217,7 +229,8 @@
       "max": 3000,
       "step": 50,
       "place": true,
-      "group": "המרפסת שמעל"
+      "group": "המרפסת העגולה שמעל",
+      "measure": true
     },
     {
       "id": "balcZ",
@@ -227,7 +240,8 @@
       "max": 4000,
       "step": 50,
       "place": true,
-      "group": "המרפסת שמעל"
+      "group": "המרפסת העגולה שמעל",
+      "measure": true
     },
     {
       "id": "pavD",
@@ -237,7 +251,8 @@
       "max": 4000,
       "step": 10,
       "place": true,
-      "group": "הריצוף"
+      "group": "הריצוף",
+      "measure": true
     }
   ],
   "derived": {
