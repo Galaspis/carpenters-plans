@@ -503,7 +503,9 @@ function renderStatus() {
   if (s) {
     const v = k => state.spaces?.[s.id]?.[k] ?? s.fields[k]?.value;
     const names = { width: 'רוחב', depth: 'עומק', height: 'גובה' };
-    const bad = [['width', W, (v('width') ?? Infinity) - (v('reserve') || 0)], ['depth', D, v('depth') ?? Infinity], ['height', H, v('height') ?? Infinity]].filter(([k, a, lim]) => s.fields[k] && a > lim);
+    // a design may replace a limit with an expression (e.g. the pergola: "no limit" when the depth field equals the paving)
+    const lim = k => { const e = state.design.fitLimits?.[k]; if (e) { try { return evalExpr(e, r.model.scope); } catch {} } const x = v(k); return x ? x : Infinity; };
+    const bad = [['width', W, lim('width') - (v('reserve') || 0)], ['depth', D, lim('depth')], ['height', H, lim('height')]].filter(([k, a, l]) => s.fields[k] && a > l);
     cards.push(bad.length ? `<div class="stat-card bad"><b>לא נכנס</b><span>${bad.map(([k, a, lim]) => `${names[k]} ${a} מתוך ${Math.round(lim)} פנוי`).join(' · ')} (כולל יריעת הגג והבליטות)</span></div>` : `<div class="stat-card ok"><b>✔ נכנס במקום</b><span>לפי המידות משלב 1</span></div>`);
   }
   for (const st of state.design.strength || []) {

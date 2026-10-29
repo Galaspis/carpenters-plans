@@ -18,8 +18,8 @@
           "value": 4200
         },
         "depth": {
-          "label": "עומק פנוי מהקיר החוצה — עד איפה מותר לבנות, גם מעבר לריצוף (מ\"מ)",
-          "value": 2800
+          "label": "מגבלת עומק מהקיר, אם יש (קיר, גדר, עץ). 0 או כעומק הריצוף = אין מגבלה",
+          "value": 0
         },
         "height": {
           "label": "גובה פנוי בקיר, מתחת לחלון / מרפסת (מ\"מ)",
@@ -327,8 +327,9 @@
     }
   ],
   "derived": {
+    "depthLimit": "wall_depth > pavD ? wall_depth : 4000",
     "Dwant": "pavD + beyond",
-    "D": "clamp(Dwant, 1200, min(4000, wall_depth))",
+    "D": "clamp(Dwant, 1200, min(4000, depthLimit))",
     "qRoof": "0.001",
     "sigAdm": "7",
     "Ewood": "9000",
@@ -513,12 +514,12 @@
       "contextOnly": true,
       "at": [
         "-wallOff",
-        "wallY - wall_depth",
+        "wallY - max(wall_depth, Dwant)",
         "-170"
       ],
       "size": [
         "wall_width",
-        "wall_depth",
+        "max(wall_depth, Dwant)",
         "20"
       ]
     },
@@ -1472,7 +1473,7 @@
       ]
     },
     {
-      "label": "עומק פנוי",
+      "label": "מגבלת עומק",
       "value": "wall_depth",
       "from": [
         "-wallOff - 150",
@@ -1689,7 +1690,7 @@
     },
     {
       "when": "D < Dwant",
-      "text": "העומק הפנוי שהזנת בשלב \"מקום\" ({wall_depth}) קטן מהריצוף ({pavD}) ועוד הבליטה שביקשת ({beyond}) = {Dwant}. \"עומק פנוי\" הוא כמה אפשר לצאת מהקיר, כולל מעבר לריצוף — אם יש שם מקום, הגדל אותו; אחרת בקש בליטה קטנה יותר. בינתיים הגג מגיע ל-{D}."
+      "text": "מגבלת העומק שהזנת בשלב \"מקום\" ({wall_depth}) קטנה מהריצוף ({pavD}) ועוד הבליטה ({beyond}) = {Dwant}. אם אין שם מכשול, מחק את המגבלה (0); הגג מגיע בינתיים ל-{D}."
     }
   ],
   "strength": [
@@ -1717,5 +1718,8 @@
       "cap": "D - pavD",
       "section": null
     }
-  ]
+  ],
+  "fitLimits": {
+    "depth": "depthLimit"
+  }
 }
