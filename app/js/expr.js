@@ -3,7 +3,7 @@
 
 const MATH = {
   min: Math.min, max: Math.max, floor: Math.floor, ceil: Math.ceil,
-  round: Math.round, abs: Math.abs, sqrt: Math.sqrt, PI: Math.PI,
+  round: Math.round, abs: Math.abs, sqrt: Math.sqrt, cbrt: Math.cbrt, pow: Math.pow, PI: Math.PI,
   clamp: (v, lo, hi) => Math.min(hi, Math.max(lo, v)),
   snap: (v, step) => Math.round(v / step) * step,
 };

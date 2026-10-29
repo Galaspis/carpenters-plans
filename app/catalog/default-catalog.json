@@ -178,6 +178,77 @@
       ],
       "pricePerMeter": 15,
       "treated": true
+    },
+    {
+      "id": "pine_t_45x195",
+      "name": "קורת אורן מטופל (אימפרגנציה) — לבדוק זמינות במחסן",
+      "t": 45,
+      "w": 195,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800,
+        5400
+      ],
+      "pricePerMeter": 42,
+      "treated": true
+    },
+    {
+      "id": "pine_t_70x145",
+      "name": "קורת אורן מטופל (אימפרגנציה) — לבדוק זמינות במחסן",
+      "t": 70,
+      "w": 145,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800
+      ],
+      "pricePerMeter": 46,
+      "treated": true
+    },
+    {
+      "id": "pine_t_70x195",
+      "name": "קורת אורן מטופל (אימפרגנציה) — לבדוק זמינות במחסן",
+      "t": 70,
+      "w": 195,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800,
+        5400
+      ],
+      "pricePerMeter": 60,
+      "treated": true
+    },
+    {
+      "id": "pine_t_120x120",
+      "name": "עמוד אורן מטופל 120×120 — לבדוק זמינות במחסן",
+      "t": 120,
+      "w": 120,
+      "lengths": [
+        2400,
+        3000,
+        3600
+      ],
+      "pricePerMeter": 58,
+      "treated": true
+    },
+    {
+      "id": "pine_t_45x95",
+      "name": "קורת אורן מטופל (אימפרגנציה)",
+      "t": 45,
+      "w": 95,
+      "lengths": [
+        3000,
+        3600,
+        4200,
+        4800
+      ],
+      "pricePerMeter": 22,
+      "treated": true
     }
   ],
   "hardware": {
@@ -237,5 +308,6 @@
     "finishCoats": 2,
     "gluePrice": 25,
     "sandpaperPrice": 20
-  }
+  },
+  "catalogV": 3
 }

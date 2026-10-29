@@ -89,8 +89,9 @@ const yardWoods = () => state.catalog.lumber.filter(l => !l.own && !l.hidden);
 async function init() {
   if (store) { await Promise.race([syncNow(), new Promise(r => setTimeout(r, 6000))]); document.addEventListener('visibilitychange', async () => { if (document.visibilityState === 'visible' && await syncNow()) location.reload(); }); }
   setSyncState(store ? 'ok' : 'off');
-  state.catalog = ls.get('cp.catalog', null) || await loadJson('catalog/default-catalog.json');
-  migrateCatalog();
+  const defaultCatalog = await loadJson('catalog/default-catalog.json');
+  state.catalog = ls.get('cp.catalog', null) || defaultCatalog;
+  migrateCatalog(defaultCatalog);
   state.index = await loadJson('designs/index.json');
   state.custom = ls.get('cp.customDesigns', []);
   $('#homeBtn').onclick = showHome;
@@ -112,8 +113,10 @@ async function init() {
   showHome();
 }
 
-function migrateCatalog() {
+function migrateCatalog(defaults) {
   const c = state.catalog;
+  // sizes added to the default catalog later (bigger treated beams, 120 posts) join a saved catalog once
+  if (defaults && (c.catalogV || 1) < (defaults.catalogV || 1)) { for (const l of defaults.lumber) if (!c.lumber.some(x => x.id === l.id)) c.lumber.push({ ...l }); c.catalogV = defaults.catalogV; }
   c.lumber ||= []; c.inventory ||= []; c.hardware ||= {}; c.transport ||= { enabled: false, poleLen: 5100, maxPiece: 2400, maxCuts: 2, margin: 30 };
   // leftovers of older versions: alias items, never yard woods; junk sections dropped
   c.lumber = c.lumber.filter(l => !(l.id.startsWith('own') && (l.t < 5 || l.w < 5) && !c.inventory.some(r => r.itemId === l.id)));
@@ -502,6 +505,14 @@ function renderStatus() {
     const names = { width: 'רוחב', depth: 'עומק', height: 'גובה' };
     const bad = [['width', W, (v('width') ?? Infinity) - (v('reserve') || 0)], ['depth', D, v('depth') ?? Infinity], ['height', H, v('height') ?? Infinity]].filter(([k, a, lim]) => s.fields[k] && a > lim);
     cards.push(bad.length ? `<div class="stat-card bad"><b>לא נכנס</b><span>${bad.map(([k, a, lim]) => `${names[k]} ${a} מתוך ${Math.round(lim)} פנוי`).join(' · ')} (כולל יריעת הגג והבליטות)</span></div>` : `<div class="stat-card ok"><b>✔ נכנס במקום</b><span>לפי המידות משלב 1</span></div>`);
+  }
+  for (const st of state.design.strength || []) {
+    try {
+      const span = Math.round(evalExpr(st.span, r.model.scope)), cap = Math.round(evalExpr(st.cap, r.model.scope));
+      const prof = st.section ? r.model.profiles[st.section] : null;
+      const ok = span <= cap;
+      cards.push(`<div class="stat-card ${ok ? 'ok' : 'bad'}"><b>${ok ? '✔' : '✘'} ${esc(st.label)} ${span}</b><span>${prof ? `${prof.t}×${prof.w} ` : ''}בטוח עד ${cap} מ"מ</span></div>`);
+    } catch (e) { console.warn('strength', st, e); }
   }
   for (const t of designChecks()) cards.push(`<div class="stat-card bad"><b>שים לב</b><span>${esc(t)}</span></div>`);
   {

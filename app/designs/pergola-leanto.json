@@ -1,7 +1,7 @@
 {
   "id": "pergola-leanto",
   "name": "פרגולה צמודה לקיר עם גג פוליקרבונט",
-  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית. בשלב \"מקום\" מזינים את מידות הסביבה (הקיר, הדלת, המרפסת העגולה שמעל, הריצוף) ורואים אותן במודל תלת-ממדי; במודל הפרגולה הן מופיעות באפור, להמחשה בלבד — כדי לראות שהגג עובר מתחת למרפסת ומגיע מעבר לקצה שלה.",
+  "description": "פרגולה נשענת על קיר הבית, לחסימת גשם (וטפטוף מהמרפסת שמעל): קורת קיר, עמודים קדמיים על בסיסי מתכת, קורה קדמית, רפטרים בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת 125 מ\"מ גבוה יותר. החוזק מחושב: לכל חתך עץ שבחרת האפליקציה מחשבת את המפתח הבטוח (כפיפה ושקיעה, עומס גג קל 100 ק\"ג/מ\"ר), ומזהירה כשרפטר או קורה חלשים מדי, כשהבליטה גדולה מרבע המפתח, וקובעת לבד את מרחק הרפטרים, את מקום העמודים ואת בליטת הקורה בצדדים. בשלב \"מקום\" מזינים את מידות הסביבה (הקיר, קיר הצד, הדלת, המנורה, המרפסת העגולה, הריצוף) ורואים אותן במודל.",
   "category": "גינה",
   "units": "mm",
   "view": {
@@ -31,14 +31,20 @@
   "profiles": {
     "post": {
       "label": "עמודים — עץ מטופל",
-      "t": 90,
-      "w": 90,
+      "t": 120,
+      "w": 120,
       "treated": true
     },
     "beam": {
-      "label": "קורות (קיר, קדמית, רפטרים) — עץ מטופל",
+      "label": "רפטרים וקורת קיר — עץ מטופל (45×95 מספיק למפתח הזה ונכנס מתחת למרפסת)",
       "t": 45,
-      "w": 145,
+      "w": 95,
+      "treated": true
+    },
+    "fbeam": {
+      "label": "קורה קדמית (על העמודים) — עץ מטופל, גדולה יותר",
+      "t": 70,
+      "w": 195,
       "treated": true
     },
     "purlin": {
@@ -113,7 +119,7 @@
       "step": 50,
       "fit": true,
       "fitStage": 1,
-      "suggest": "snap(min(4000, wall_depth - 200, max(1200, pavD + beyond)), 50)",
+      "suggest": "snap(min(4000, wall_depth - 200, max(1200, ceil((pavD + beyond) / 50) * 50)), 50)",
       "suggestNote": "הריצוף ועוד הבליטה שביקשת, ולא יותר מהעומק הפנוי פחות 200",
       "group": "מידות הפרגולה"
     },
@@ -135,44 +141,48 @@
       "fit": true,
       "fitStage": 1,
       "suggest": "snap(min(3000, max(lampNeedH, wall_height - 125 - beam_w - purlin_t - 16 - 30)), 10)",
-      "suggestNote": "כך שקורת הקיר (125 גבוה יותר) עוברת מעל המנורה, והגג מתחת למרפסת",
+      "suggestNote": "כך שקורת הקיר (125 גבוה יותר) עוברת מעל המנורה והגג נשאר מתחת למרפסת; אם שניהם לא מסתדרים, בחר רפטרים נמוכים יותר",
       "group": "מידות הפרגולה"
-    },
-    {
-      "id": "spacing",
-      "label": "מרחק בין רפטרים (מ\"מ)",
-      "value": 650,
-      "min": 400,
-      "max": 900,
-      "step": 50,
-      "group": "הגדרות בנייה — ברירות המחדל טובות"
-    },
-    {
-      "id": "pspacing",
-      "label": "מרחק בין מרישים (מ\"מ)",
-      "value": 600,
-      "min": 400,
-      "max": 1000,
-      "step": 50,
-      "group": "הגדרות בנייה — ברירות המחדל טובות"
     },
     {
       "id": "overhang",
       "label": "בליטת הרפטרים מעבר לקורה הקדמית",
-      "value": 200,
-      "min": 0,
-      "max": 500,
-      "step": 10,
-      "group": "הגדרות בנייה — ברירות המחדל טובות"
+      "value": 300,
+      "min": 150,
+      "max": 450,
+      "step": 150,
+      "options": [
+        {
+          "value": 150,
+          "label": "קצת"
+        },
+        {
+          "value": 300,
+          "label": "בינוני"
+        },
+        {
+          "value": 450,
+          "label": "יותר"
+        }
+      ]
     },
     {
-      "id": "sideOver",
-      "label": "בליטת הקורות בצדדים מעבר לעמודים",
-      "value": 150,
-      "min": 0,
-      "max": 400,
-      "step": 10,
-      "group": "הגדרות בנייה — ברירות המחדל טובות"
+      "id": "posts",
+      "label": "עמודים",
+      "value": 2,
+      "min": 2,
+      "max": 3,
+      "step": 1,
+      "options": [
+        {
+          "value": 2,
+          "label": "שניים"
+        },
+        {
+          "value": 3,
+          "label": "שלושה"
+        }
+      ]
     },
     {
       "id": "wallOff",
@@ -330,16 +340,33 @@
     }
   ],
   "derived": {
-    "nPosts": "W > 4500 ? 3 : 2",
-    "nR": "max(2, round((W - beam_t) / spacing) + 1)",
+    "qRoof": "0.001",
+    "sigAdm": "7",
+    "Ewood": "9000",
+    "rafterSpan": "D - beam_t - overhang - fbeam_t",
+    "rPitchMax": "600",
+    "nR": "max(2, ceil((W - beam_t) / rPitchMax) + 1)",
     "rPitch": "nR > 1 ? (W - beam_t) / (nR - 1) : 0",
-    "rafterLen": "D - beam_t",
-    "nP": "max(2, floor((rafterLen - overhang - 2*purlin_w) / pspacing) + 2)",
-    "pPitch": "nP > 1 ? (rafterLen - overhang - purlin_w) / (nP - 1) : 0",
-    "beamZ": "H",
-    "postH": "H - beam_w",
+    "wRafter": "qRoof * rPitch",
+    "rafterCapB": "sqrt(4 * sigAdm * beam_t * beam_w * beam_w / (3 * wRafter))",
+    "rafterCapD": "cbrt(384 * Ewood * (beam_t * beam_w * beam_w * beam_w / 12) / (1000 * wRafter))",
+    "rafterCap": "floor(min(rafterCapB, rafterCapD))",
+    "overhangMax": "floor(rafterSpan / 4)",
+    "nPosts": "posts",
+    "sideOver": "min(500, snap((W - post_t) / 7, 10))",
     "postX0": "sideOver",
     "postStep": "nPosts > 1 ? (W - 2*sideOver - post_t) / (nPosts - 1) : 0",
+    "beamSpan": "postStep - post_t",
+    "wBeam": "qRoof * (rafterSpan / 2 + overhang + fbeam_t)",
+    "beamCapB": "sqrt(4 * sigAdm * fbeam_t * fbeam_w * fbeam_w / (3 * wBeam))",
+    "beamCapD": "cbrt(384 * Ewood * (fbeam_t * fbeam_w * fbeam_w * fbeam_w / 12) / (1000 * wBeam))",
+    "beamCap": "floor(min(beamCapB, beamCapD))",
+    "rafterLen": "D - beam_t",
+    "pPitchMax": "600",
+    "nP": "max(2, floor((rafterLen - overhang - 2*purlin_w) / pPitchMax) + 2)",
+    "pPitch": "nP > 1 ? (rafterLen - overhang - purlin_w) / (nP - 1) : 0",
+    "beamZ": "H",
+    "postH": "H - fbeam_w",
     "sheets": "ceil(W / 1050)",
     "sheetLen": "ceil(rafterLen / 100) * 100 + 100",
     "wallY": "D",
@@ -404,7 +431,8 @@
         "post_t + 10",
         "post_t + 10",
         "3"
-      ]
+      ],
+      "illustration": true
     },
     {
       "id": "post",
@@ -425,7 +453,7 @@
     {
       "id": "frontBeam",
       "name": "קורה קדמית",
-      "profile": "beam",
+      "profile": "fbeam",
       "count": 1,
       "at": [
         "0",
@@ -434,8 +462,8 @@
       ],
       "size": [
         "W",
-        "beam_t",
-        "beam_w"
+        "fbeam_t",
+        "fbeam_w"
       ]
     },
     {
@@ -693,8 +721,7 @@
     {
       "a": "frontBeam",
       "b": "post",
-      "through": "frontBeam",
-      "count": 2
+      "method": "none"
     },
     {
       "a": "rafter",
@@ -1250,7 +1277,7 @@
   ],
   "extras": [
     {
-      "name": "תליית קורה (joist hanger) לרפטר 45×145 + ברגי תלייה 4×40 (כ-20 לתלייה)",
+      "name": "תליית קורה (joist hanger) לרפטר (לפי החתך שנבחר) + ברגי תלייה 4×40 (כ-20 לתלייה)",
       "qty": "nR",
       "price": 12,
       "icon": "hook"
@@ -1662,6 +1689,42 @@
     {
       "when": "sideD > 0 && wallOff < 50",
       "text": "הפרגולה צמודה לקיר הצד: השאר לפחות 50 מ\"מ בין קצה הקורות לקיר הצד."
+    },
+    {
+      "when": "rafterSpan > rafterCap",
+      "text": "הרפטרים חלשים מדי: המפתח ביניהם {rafterSpan} מ\"מ, וחתך {beam_t}×{beam_w} בטוח עד {rafterCap}. בשלב \"עץ\" בחר לרפטרים חתך גבוה יותר (45×195 או 70×195), או הקטן את העומק."
+    },
+    {
+      "when": "overhang > overhangMax",
+      "text": "הבליטה {overhang} גדולה מרבע המפתח ({overhangMax}): הרפטרים ייכפפו בקצה. בחר בליטה קטנה יותר או הגדל את העומק."
+    },
+    {
+      "when": "beamSpan > beamCap",
+      "text": "הקורה הקדמית חלשה מדי לשני עמודים: המפתח בין העמודים {beamSpan} מ\"מ, וחתך {fbeam_t}×{fbeam_w} בטוח עד {beamCap}. בחר לקורה הקדמית חתך גדול יותר (70×195), או עבור לשלושה עמודים."
+    },
+    {
+      "when": "rPitch > 620",
+      "text": "מרחק הרפטרים {rPitch} גדול מדי ליריעת פוליקרבונט 16 מ\"מ (עד 600)."
+    }
+  ],
+  "strength": [
+    {
+      "label": "רפטרים",
+      "span": "rafterSpan",
+      "cap": "rafterCap",
+      "section": "beam"
+    },
+    {
+      "label": "קורה קדמית",
+      "span": "beamSpan",
+      "cap": "beamCap",
+      "section": "fbeam"
+    },
+    {
+      "label": "בליטה",
+      "span": "overhang",
+      "cap": "overhangMax",
+      "section": null
     }
   ]
 }
