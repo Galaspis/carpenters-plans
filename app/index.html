@@ -175,6 +175,7 @@
   /* ---- the canvas ---- */
   .viewer3d { position:relative; height:520px; background:var(--canvas); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden; direction:ltr; }
   .viewer3d.small { height:380px; }
+  #spaces h4.grp { margin:16px 0 6px; font-size:14px; color:var(--muted); font-weight:700; } #spaces h4.grp:first-child { margin-top:0; }
   .viewer3d .hint { position:absolute; left:10px; bottom:8px; font-size:12px; color:var(--muted); background:rgba(255,255,255,.85); padding:2px 8px; border-radius:10px; pointer-events:none; direction:rtl; }
   .viewer3d .lbl { position:absolute; transform:translate(-50%,-50%); background:rgba(255,255,255,.94); border:1.5px solid var(--ink); border-radius:10px; padding:1px 7px; font-size:12px; font-weight:bold; color:var(--ink); pointer-events:none; white-space:nowrap; font-family:'Nunito Sans', sans-serif; }
   .viewer3d .lbl.num { border-radius:50%; width:24px; height:24px; padding:0; line-height:21px; text-align:center; }
@@ -270,7 +271,7 @@
     <button class="hbtn" id="backupBtn" title="גיבוי לקובץ"><img class="ic" src="brand/icons/save.svg" alt=""><span class="t">גיבוי</span></button>
     <button class="hbtn" id="restoreBtn" title="שחזור מקובץ"><img class="ic" src="brand/icons/project-open.svg" alt=""><span class="t">שחזור</span></button>
     <input type="file" id="restoreFile" accept=".json" hidden>
-    <span id="ver" hidden>v68</span>
+    <span id="ver" hidden>v69</span>
   </span>
   <div id="printMenu" class="printmenu" hidden>
     <b>מה להדפיס?</b>
@@ -314,7 +315,13 @@
       <div class="step-head"><h2>איפה הרהיט יעמוד?</h2><p>מדוד את המקום. המידות בשלב הבא יוצעו לפי זה.</p></div>
       <div class="two">
         <div class="card"><h3><img class="ic" src="brand/icons/space.svg" alt="">המקום הפנוי (מ"מ)</h3><div id="spaces"></div></div>
-        <div class="card"><h3>תמונת השראה (לא חובה)</h3><div class="dropzone" id="photoDrop">גרור לכאן תמונה או לחץ לבחירה — תופיע בעמוד הראשון של התוכנית</div><img id="photo" class="photo" hidden style="margin-top:10px"></div>
+        <div>
+          <div class="spaceview" hidden>
+            <div class="viewer3d small noprint" id="viewer3dSpace"><div class="hint">המקום כפי שמדדת · סובב: גרירה · זום: גלגלת</div></div>
+            <p class="muted" style="margin:8px 0 14px">המודל מתעדכן תוך כדי הקלדה. המידות נמדדות מהקצה השמאלי של הקיר הפנוי.</p>
+          </div>
+          <div class="card"><h3>תמונת השראה (לא חובה)</h3><div class="dropzone" id="photoDrop">גרור לכאן תמונה או לחץ לבחירה — תופיע בעמוד הראשון של התוכנית</div><img id="photo" class="photo" hidden style="margin-top:10px"></div>
+        </div>
       </div>
       <div class="step-nav"><button class="btn ghost noprint" id="saveAsMine" hidden><img class="ic" src="brand/icons/save.svg" alt="">שמור כפרויקט שלי</button><button class="btn primary lg" data-go="sizes">ממשיכים למידות<img class="ic" src="brand/icons/next-rtl.svg" alt=""></button></div>
     </section>

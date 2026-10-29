@@ -354,6 +354,7 @@ function showStep(id) {
   $('#stepper').style.setProperty('--p', (STEPS.indexOf(id) / (STEPS.length - 1) * 100) + '%');
   setPer('step', id);
   window.scrollTo(0, 0);
+  if (id === 'place') setTimeout(() => { spaceViewer?.resize(); mountSpaceView(); }, 50);
   if (id === 'sizes') { renderParams(); renderStatus(); setTimeout(() => { previewViewer?.resize(); mountPreview(); }, 50); }
   if (id === 'wood') renderWoodStep();
   if (id === 'plan') { renderPlanBasis(); if (mainViewer) mainViewer.resize(); }
@@ -361,19 +362,56 @@ function showStep(id) {
 }
 
 // ---------- step 1: place ----------
+// The measured place: the design's "spaces" fields, plus any param marked place:true (the surroundings:
+// door, balcony, paving...). Designs with placeDims also get a 3D view of the area, drawn from the
+// parts marked existing + illustration, with the measures as dimension lines.
 function renderSpaces() {
   const box = $('#spaces'); box.innerHTML = '';
   const specs = state.design.spaces || [];
-  if (!specs.length) { box.innerHTML = '<p class="muted">לעיצוב הזה אין הגדרת מקום — המשך למידות.</p>'; return; }
+  const placeParams = state.design.params.filter(p => p.place);
+  if (!specs.length && !placeParams.length) { box.innerHTML = '<p class="muted">לעיצוב הזה אין הגדרת מקום — המשך למידות.</p>'; mountSpaceView(); return; }
   const NICE = { width: 'רוחב פנוי', depth: 'עומק פנוי', height: 'גובה פנוי', reserve: 'רוחב שאתה שומר לרהיט אחר באותו קיר (0 אם אין)' };
-  for (const s of specs) {
-    for (const [f, def] of Object.entries(s.fields)) {
-      const row = document.createElement('div'); row.className = 'field';
-      row.innerHTML = `<label>${esc(NICE[f] || def.label)}</label><input type="number" value="${state.spaces?.[s.id]?.[f] ?? def.value}" step="10">`;
-      row.querySelector('input').oninput = e => { (state.spaces[s.id] ||= {})[f] = +e.target.value; fitToSpace(false, false); recompute(); };
-      box.appendChild(row);
+  const field = (label, value, attrs, onInput) => {
+    const row = document.createElement('div'); row.className = 'field';
+    row.innerHTML = `<label>${esc(label)}</label><input type="number" value="${value}" ${attrs}>`;
+    row.querySelector('input').oninput = e => { const v = +e.target.value; if (Number.isFinite(v)) onInput(v); };
+    return row;
+  };
+  for (const sp of specs) {
+    if (placeParams.length) box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(sp.label || 'המקום')}</h4>`);
+    for (const [f, def] of Object.entries(sp.fields)) {
+      box.appendChild(field(placeParams.length ? def.label : (NICE[f] || def.label), state.spaces?.[sp.id]?.[f] ?? def.value, 'step="10"', v => { (state.spaces[sp.id] ||= {})[f] = v; fitToSpace(false, false); recompute(); }));
     }
   }
+  let group = null;
+  for (const p of placeParams) {
+    if (p.group && p.group !== group) { group = p.group; box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(group)}</h4>`); }
+    box.appendChild(field(p.label, state.values[p.id] ?? p.value, `min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 1}"`, v => { if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; recompute(); } }));
+  }
+  mountSpaceView();
+}
+function placeDims() {
+  const r = state.result; if (!r || r.error) return [];
+  const out = [];
+  for (const d of state.design.placeDims || []) {
+    try { out.push({ from: d.from.map(e => evalExpr(e, r.model.scope)), to: d.to.map(e => evalExpr(e, r.model.scope)), label: `${d.label} ${Math.round(evalExpr(d.value, r.model.scope))}`, color: 0xb7742c }); } catch (e) { console.warn('placeDim', d, e); }
+  }
+  return out;
+}
+let spaceViewer = null;
+async function mountSpaceView() {
+  const host = $('#viewer3dSpace'); if (!host) return;
+  const has = !!(state.design.placeDims || []).length;
+  host.closest('.spaceview').hidden = !has;
+  if (!has || host.closest('.steppane').hidden || !state.result || state.result.error) return;
+  const env = state.result.model.instances.filter(x => x.existing && x.def.illustration);
+  const mod = await loadViewer(); if (!mod) { host.innerHTML = iso(env, { view: state.design.placeView || state.design.view }); return; }
+  if (!spaceViewer) { try { spaceViewer = mod.createViewer(host, { forceSvg: location.search.includes('svg') }); } catch (e) { console.error(e); return; } }
+  // nothing here is "ours", so frame the whole area (the viewer only frames non-existing parts by itself)
+  const shown = env.map(x => ({ ...x, existing: false, def: { ...x.def, illustration: true } }));
+  spaceViewer.resize(); // the pane may have had no size when the viewer was created
+  spaceViewer.show(shown, { ghost: new Set(shown.map(x => x.uid)), dims: placeDims(), keepCamera: spaceViewer._shown });
+  spaceViewer._shown = true;
 }
 
 // ---------- step 2: sizes ----------
@@ -400,6 +438,7 @@ function renderParams() {
   const box = $('#params'); if (!box) return; box.innerHTML = '';
   const manual = manualSet();
   for (const p of state.design.params) {
+    if (p.place) continue;
     const label = p.label.replace(/\s*\((1 = כן, 0 = לא|0 = [^)]*)\)\s*$/, '');
     if (p.showIf) { try { if (!evalExpr(p.showIf, { ...state.values })) continue; } catch {} }
     if (p.options) {
@@ -689,7 +728,7 @@ function recompute() {
   } catch (e) { console.error(e); res = { error: e.message }; }
   state.result = res;
   persist();
-  for (const fn of [renderWarnings, renderOverview, renderParts, renderAssembly, renderCut, renderShop, renderDesignTab, renderStatus, mountPreview]) {
+  for (const fn of [renderWarnings, renderOverview, renderParts, renderAssembly, renderCut, renderShop, renderDesignTab, renderStatus, mountPreview, mountSpaceView]) {
     try { fn(); } catch (e) { console.error(fn.name, e); $('#warnings').insertAdjacentHTML('beforeend', `<div class="warn">שגיאה בהצגת ${fn.name}: ${esc(e.message)}</div>`); }
   }
   if (!$('#step-wood').hidden) renderWoodStep();

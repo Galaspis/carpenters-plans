@@ -67,6 +67,13 @@ can be edited, tagged, starred, marked "want to build" / "built", filtered and
 searched. The library is one shared family document in the hub store
 (`/api/family/saw`); when two devices disagree the newer item wins.
 
+A design can describe its surroundings on the "מקום" step: params marked `place: true`
+(grouped by `group`) are entered there instead of the sizes step, parts marked
+`existing` + `illustration` are drawn as a 3D model of the measured area, and
+`placeDims` (label, value expression, from, to) are the dimension lines on it.
+The pergola uses this for the wall, door, round balcony and paving, all measured
+from the left end of the free wall.
+
 Built-in designs (`app/designs/index.json`):
 
 | id | name |

@@ -1,7 +1,7 @@
 {
   "id": "pergola-leanto",
   "name": "פרגולה צמודה לקיר עם גג פוליקרבונט",
-  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית. במודל מופיעים באפור, להמחשה בלבד: הקיר, הדלת, הריצוף, המרפסת העגולה שמעל (לפי המידות שתזין) ויריעת הגג — כדי לראות שהגג עובר מתחת למרפסת ומגיע מעבר לקצה שלה.",
+  "description": "פרגולה נשענת על קיר הבית: קורת קיר, שני עמודים קדמיים על בסיסי מתכת, קורה קדמית, קורות גג (רפטרים) בין הקיר לקורה הקדמית, מרישים לרוחב ויריעות פוליקרבונט שקופות. השיפוע לניקוז נוצר בהתקנה — קורת הקיר נקבעת גבוה יותר מהקורה הקדמית. בשלב \"מקום\" מזינים את מידות הסביבה (הקיר, הדלת, המרפסת העגולה שמעל, הריצוף) ורואים אותן במודל תלת-ממדי; במודל הפרגולה הן מופיעות באפור, להמחשה בלבד — כדי לראות שהגג עובר מתחת למרפסת ומגיע מעבר לקצה שלה.",
   "category": "גינה",
   "units": "mm",
   "view": {
@@ -11,7 +11,7 @@
   "spaces": [
     {
       "id": "wall",
-      "label": "הקיר שעליו נשענת הפרגולה",
+      "label": "המקום: הקיר והשטח שלפניו",
       "fields": {
         "width": {
           "label": "אורך הקיר הפנוי (מ\"מ)",
@@ -22,7 +22,7 @@
           "value": 2800
         },
         "height": {
-          "label": "גובה מקסימלי בקיר, מתחת לחלון/גג (מ\"מ)",
+          "label": "גובה פנוי בקיר, מתחת לחלון / מרפסת (מ\"מ)",
           "value": 2800
         }
       }
@@ -160,44 +160,84 @@
       "step": 10
     },
     {
-      "id": "balcX",
-      "label": "להמחשה: מרכז המרפסת העגולה מהקצה השמאלי (מ\"מ)",
-      "value": 0,
-      "min": -3000,
-      "max": 7000,
-      "step": 50
-    },
-    {
-      "id": "balcR",
-      "label": "להמחשה: רדיוס המרפסת (מ\"מ)",
-      "value": 1600,
-      "min": 500,
+      "id": "wallOff",
+      "label": "מרחק הפרגולה מהקצה השמאלי של הקיר",
+      "value": 50,
+      "min": 0,
       "max": 3000,
-      "step": 50
-    },
-    {
-      "id": "balcZ",
-      "label": "להמחשה: גובה תחתית המרפסת (מ\"מ)",
-      "value": 2600,
-      "min": 2000,
-      "max": 4000,
-      "step": 50
+      "step": 10,
+      "place": true,
+      "group": "הקיר"
     },
     {
       "id": "doorX",
-      "label": "להמחשה: הדלת — מהקצה השמאלי (מ\"מ)",
+      "label": "הדלת — מהקצה השמאלי של הקיר",
       "value": 690,
       "min": 0,
       "max": 7000,
-      "step": 10
+      "step": 10,
+      "place": true,
+      "group": "הדלת"
+    },
+    {
+      "id": "doorW",
+      "label": "רוחב הדלת",
+      "value": 900,
+      "min": 600,
+      "max": 2500,
+      "step": 10,
+      "place": true,
+      "group": "הדלת"
+    },
+    {
+      "id": "doorH",
+      "label": "גובה הדלת",
+      "value": 2100,
+      "min": 1800,
+      "max": 2600,
+      "step": 10,
+      "place": true,
+      "group": "הדלת"
+    },
+    {
+      "id": "balcX",
+      "label": "מרכז המרפסת העגולה — מהקצה השמאלי של הקיר",
+      "value": 0,
+      "min": -3000,
+      "max": 7000,
+      "step": 50,
+      "place": true,
+      "group": "המרפסת שמעל"
+    },
+    {
+      "id": "balcR",
+      "label": "רדיוס המרפסת",
+      "value": 1600,
+      "min": 500,
+      "max": 3000,
+      "step": 50,
+      "place": true,
+      "group": "המרפסת שמעל"
+    },
+    {
+      "id": "balcZ",
+      "label": "גובה תחתית המרפסת מהרצפה",
+      "value": 2600,
+      "min": 2000,
+      "max": 4000,
+      "step": 50,
+      "place": true,
+      "group": "המרפסת שמעל"
     },
     {
       "id": "pavD",
-      "label": "להמחשה: עומק הריצוף מהקיר (מ\"מ)",
+      "label": "עומק הריצוף הקיים מהקיר",
       "value": 1660,
       "min": 500,
       "max": 4000,
-      "step": 10
+      "step": 10,
+      "place": true,
+      "group": "הריצוף"
     }
   ],
   "derived": {
@@ -216,7 +256,8 @@
     "wallY": "D",
     "nSeg": "10",
     "nAnch": "ceil(W / 600) + 1",
-    "aPitch": "(W - 300) / (nAnch - 1)"
+    "aPitch": "(W - 300) / (nAnch - 1)",
+    "wallH": "max(wall_height, balcZ + 400) + 300"
   },
   "dims": [
     {
@@ -346,6 +387,25 @@
       ]
     },
     {
+      "id": "ground",
+      "name": "השטח הפנוי שנמדד (להמחשה)",
+      "profile": "slab",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "at": [
+        "-wallOff",
+        "wallY - wall_depth",
+        "-170"
+      ],
+      "size": [
+        "wall_width",
+        "wall_depth",
+        "20"
+      ]
+    },
+    {
       "id": "paving",
       "name": "הריצוף (להמחשה)",
       "profile": "slab",
@@ -353,12 +413,12 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "0",
+        "-wallOff",
         "wallY - pavD",
         "-150"
       ],
       "size": [
-        "W",
+        "wall_width",
         "pavD",
         "150"
       ]
@@ -371,14 +431,14 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "-300",
+        "-wallOff",
         "wallY",
         "-150"
       ],
       "size": [
-        "W + 600",
+        "wall_width",
         "200",
-        "balcZ + 1400"
+        "wallH + 150"
       ]
     },
     {
@@ -389,14 +449,14 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "doorX",
+        "doorX - wallOff",
         "wallY - 20",
         "0"
       ],
       "size": [
-        "900",
+        "doorW",
         "20",
-        "2100"
+        "doorH"
       ]
     },
     {
@@ -407,7 +467,7 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "balcX - balcR*(i+1)/nSeg",
+        "balcX - wallOff - balcR*(i+1)/nSeg",
         "wallY - balcR*sqrt(1 - ((i+0.5)/nSeg)*((i+0.5)/nSeg))",
         "balcZ"
       ],
@@ -1243,5 +1303,151 @@
       "text": "הסר את התמיכות הזמניות. בדוק שכל הברגים הדוקים. אחרי הגשם הראשון — עבור על הגג ובדוק טפטוף.",
       "tip": "מרזב בחזית אפשר להוסיף אחר כך, אם הטפטוף מפריע."
     }
-  ]
+  ],
+  "placeDims": [
+    {
+      "label": "אורך הקיר",
+      "value": "wall_width",
+      "from": [
+        "-wallOff",
+        "wallY + 200",
+        "wallH + 100"
+      ],
+      "to": [
+        "wall_width - wallOff",
+        "wallY + 200",
+        "wallH + 100"
+      ]
+    },
+    {
+      "label": "עומק פנוי",
+      "value": "wall_depth",
+      "from": [
+        "-wallOff - 150",
+        "wallY",
+        "0"
+      ],
+      "to": [
+        "-wallOff - 150",
+        "wallY - wall_depth",
+        "0"
+      ]
+    },
+    {
+      "label": "גובה פנוי",
+      "value": "wall_height",
+      "from": [
+        "wall_width - wallOff + 150",
+        "wallY",
+        "0"
+      ],
+      "to": [
+        "wall_width - wallOff + 150",
+        "wallY",
+        "wall_height"
+      ]
+    },
+    {
+      "label": "דלת מהקצה",
+      "value": "doorX",
+      "from": [
+        "-wallOff",
+        "wallY - 60",
+        "doorH + 120"
+      ],
+      "to": [
+        "doorX - wallOff",
+        "wallY - 60",
+        "doorH + 120"
+      ]
+    },
+    {
+      "label": "רוחב דלת",
+      "value": "doorW",
+      "from": [
+        "doorX - wallOff",
+        "wallY - 60",
+        "doorH + 60"
+      ],
+      "to": [
+        "doorX - wallOff + doorW",
+        "wallY - 60",
+        "doorH + 60"
+      ]
+    },
+    {
+      "label": "גובה דלת",
+      "value": "doorH",
+      "from": [
+        "doorX - wallOff + doorW + 60",
+        "wallY - 60",
+        "0"
+      ],
+      "to": [
+        "doorX - wallOff + doorW + 60",
+        "wallY - 60",
+        "doorH"
+      ]
+    },
+    {
+      "label": "מרכז מרפסת",
+      "value": "balcX",
+      "from": [
+        "-wallOff",
+        "wallY - balcR - 150",
+        "balcZ"
+      ],
+      "to": [
+        "balcX - wallOff",
+        "wallY - balcR - 150",
+        "balcZ"
+      ]
+    },
+    {
+      "label": "רדיוס",
+      "value": "balcR",
+      "from": [
+        "balcX - wallOff",
+        "wallY",
+        "balcZ + 230"
+      ],
+      "to": [
+        "balcX - wallOff",
+        "wallY - balcR",
+        "balcZ + 230"
+      ]
+    },
+    {
+      "label": "גובה מרפסת",
+      "value": "balcZ",
+      "from": [
+        "balcX - wallOff + balcR + 150",
+        "wallY - 100",
+        "0"
+      ],
+      "to": [
+        "balcX - wallOff + balcR + 150",
+        "wallY - 100",
+        "balcZ"
+      ]
+    },
+    {
+      "label": "ריצוף",
+      "value": "pavD",
+      "from": [
+        "wall_width - wallOff + 150",
+        "wallY",
+        "-150"
+      ],
+      "to": [
+        "wall_width - wallOff + 150",
+        "wallY - pavD",
+        "-150"
+      ]
+    }
+  ],
+  "placeView": {
+    "azimuth": -35,
+    "elevation": 18
+  }
 }
