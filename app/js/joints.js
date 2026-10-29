@@ -92,6 +92,7 @@ export function computeJoints(model, design) {
   for (let a = 0; a < instances.length; a++) {
     for (let b = a + 1; b < instances.length; b++) {
       const A = instances[a], B = instances[b];
+      if (A.existing && B.existing) continue; // two things that are already there (a wall and a side wall) are never screwed together
       const c = findContact(A, B);
       if (!c) continue;
       const ov = overrides.find(o => (o.a === A.def.id && o.b === B.def.id) || (o.a === B.def.id && o.b === A.def.id));

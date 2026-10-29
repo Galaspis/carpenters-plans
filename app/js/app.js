@@ -496,6 +496,9 @@ function renderStatus() {
     const bad = [['width', W, (v('width') ?? Infinity) - (v('reserve') || 0)], ['depth', D, v('depth') ?? Infinity], ['height', H, v('height') ?? Infinity]].filter(([k, a, lim]) => s.fields[k] && a > lim);
     cards.push(bad.length ? `<div class="stat-card bad"><b>לא נכנס</b><span>${bad.map(([k]) => names[k]).join(', ')} גדול מהמקום</span></div>` : `<div class="stat-card ok"><b>✔ נכנס במקום</b><span>לפי המידות משלב 1</span></div>`);
   }
+  for (const t of designChecks()) cards.push(`<div class="stat-card bad"><b>שים לב</b><span>${esc(t)}</span></div>`);
+  {
+  }
   cards.push(`<div class="stat-card"><b>${r.groups.length} · ${r.bom.screwCount}</b><span>חלקים שונים · ברגים</span></div>`);
   box.innerHTML = cards.join('');
 }
@@ -750,10 +753,22 @@ function recompute() {
   }
   if (!$('#step-wood').hidden) renderWoodStep();
 }
+// design-level checks: { when: expr, text } — the text may embed {expr} pieces, evaluated in the model scope
+function designChecks() {
+  const r = state.result; if (!r || r.error) return [];
+  const out = [];
+  for (const c of state.design.checks || []) {
+    try {
+      if (!evalExpr(c.when, r.model.scope)) continue;
+      out.push(c.text.replace(/\{([^}]+)\}/g, (_, e) => { try { return String(Math.round(evalExpr(e, r.model.scope))); } catch { return '?'; } }));
+    } catch (e) { console.warn('check', c, e); }
+  }
+  return out;
+}
 function renderWarnings() {
   const r = state.result, box = $('#warnings');
   if (r.error) { box.innerHTML = `<div class="warn">שגיאה: ${esc(r.error)}</div>`; return; }
-  const w = r.model.warnings;
+  const w = [...r.model.warnings, ...designChecks().map(t => 'התנגשות: ' + t)];
   const bad = w.filter(x => x.startsWith('התנגשות')), soft = w.filter(x => !x.startsWith('התנגשות'));
   box.innerHTML = (bad.length ? `<div class="warn"><b>${bad.length} בעיות בתכנון:</b><br>${bad.map(esc).join('<br>')}</div>` : '') +
     (soft.length ? `<div class="warn soft"><b>${soft.length} הערות:</b> ${[...new Set(soft)].map(esc).join(' · ')}</div>` : '');

@@ -113,9 +113,17 @@
       "step": 50,
       "fit": true,
       "fitStage": 1,
-      "suggest": "snap(min(4000, wall_depth - 200), 50)",
-      "suggestNote": "העומק הפנוי פחות 200 מ\"מ",
+      "suggest": "snap(min(4000, wall_depth - 200, max(1200, pavD + beyond)), 50)",
+      "suggestNote": "הריצוף ועוד הבליטה שביקשת, ולא יותר מהעומק הפנוי פחות 200",
       "group": "מידות הפרגולה"
+    },
+    {
+      "id": "beyond",
+      "label": "כמה הגג (קצה הרפטרים) יבלוט מעבר לקצה הריצוף",
+      "value": 300,
+      "min": 0,
+      "max": 1500,
+      "step": 50
     },
     {
       "id": "H",
@@ -178,6 +186,26 @@
       "measure": true
     },
     {
+      "id": "sideD",
+      "label": "קיר צד שמאלי: כמה הוא יוצא מהקיר החוצה (0 אם אין)",
+      "value": 1000,
+      "min": 0,
+      "max": 5000,
+      "step": 10,
+      "place": true,
+      "group": "קיר הצד (משמאל)"
+    },
+    {
+      "id": "sideH",
+      "label": "קיר צד שמאלי: גובה",
+      "value": 2800,
+      "min": 500,
+      "max": 5000,
+      "step": 10,
+      "place": true,
+      "group": "קיר הצד (משמאל)"
+    },
+    {
       "id": "doorX",
       "label": "הדלת — מהקצה השמאלי של הקיר",
       "value": 690,
@@ -211,26 +239,84 @@
       "measure": true
     },
     {
-      "id": "balcX",
-      "label": "מרכז המרפסת העגולה — מהקצה השמאלי של הקיר",
-      "value": 0,
-      "min": -3000,
+      "id": "lampX",
+      "label": "מרכז המנורה — מהקצה השמאלי של הקיר (0 אם אין)",
+      "value": 1140,
+      "min": 0,
       "max": 7000,
-      "step": 50,
+      "step": 10,
       "place": true,
-      "group": "המרפסת העגולה שמעל",
-      "measure": true
+      "group": "המנורה מעל הדלת"
     },
     {
-      "id": "balcR",
-      "label": "רדיוס המרפסת",
-      "value": 1600,
-      "min": 500,
-      "max": 3000,
-      "step": 50,
+      "id": "lampZ",
+      "label": "גובה תחתית המנורה מהרצפה",
+      "value": 2250,
+      "min": 1500,
+      "max": 4000,
+      "step": 10,
       "place": true,
-      "group": "המרפסת העגולה שמעל",
-      "measure": true
+      "group": "המנורה מעל הדלת"
+    },
+    {
+      "id": "lampW",
+      "label": "רוחב המנורה",
+      "value": 200,
+      "min": 50,
+      "max": 800,
+      "step": 10,
+      "place": true,
+      "group": "המנורה מעל הדלת"
+    },
+    {
+      "id": "lampH",
+      "label": "גובה המנורה",
+      "value": 250,
+      "min": 50,
+      "max": 800,
+      "step": 10,
+      "place": true,
+      "group": "המנורה מעל הדלת"
+    },
+    {
+      "id": "lampD",
+      "label": "כמה המנורה בולטת מהקיר",
+      "value": 150,
+      "min": 20,
+      "max": 600,
+      "step": 10,
+      "place": true,
+      "group": "המנורה מעל הדלת"
+    },
+    {
+      "id": "balcE",
+      "label": "קצה המרפסת הימני — מהקצה השמאלי של הקיר",
+      "value": 1285,
+      "min": 0,
+      "max": 8000,
+      "step": 5,
+      "place": true,
+      "group": "המרפסת העגולה שמעל"
+    },
+    {
+      "id": "balcC",
+      "label": "רוחב המרפסת לאורך הקיר (אם היא נמשכת מעבר לקיר הצד — כל הרוחב)",
+      "value": 1285,
+      "min": 500,
+      "max": 7000,
+      "step": 10,
+      "place": true,
+      "group": "המרפסת העגולה שמעל"
+    },
+    {
+      "id": "balcS",
+      "label": "כמה המרפסת בולטת מהקיר, באמצע",
+      "value": 1600,
+      "min": 100,
+      "max": 4000,
+      "step": 10,
+      "place": true,
+      "group": "המרפסת העגולה שמעל"
     },
     {
       "id": "balcZ",
@@ -269,10 +355,13 @@
     "sheets": "ceil(W / 1050)",
     "sheetLen": "ceil(rafterLen / 100) * 100 + 100",
     "wallY": "D",
-    "nSeg": "10",
+    "nSeg": "12",
     "nAnch": "ceil(W / 600) + 1",
     "aPitch": "(W - 300) / (nAnch - 1)",
-    "wallH": "max(wall_height, balcZ + 400) + 300"
+    "wallH": "max(wall_height, balcZ + 400) + 300",
+    "balcR": "(balcC*balcC/4 + balcS*balcS) / (2*balcS)",
+    "balcK": "balcR - balcS",
+    "balcX": "balcE - balcC/2"
   },
   "dims": [
     {
@@ -482,16 +571,52 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "balcX - wallOff - balcR*(i+1)/nSeg",
-        "wallY - balcR*sqrt(1 - ((i+0.5)/nSeg)*((i+0.5)/nSeg))",
+        "balcX - wallOff - sqrt(max(0, balcR*balcR - (balcK + balcS*(i+0.5)/nSeg)*(balcK + balcS*(i+0.5)/nSeg)))",
+        "wallY - balcS*(i+1)/nSeg",
         "balcZ"
       ],
       "size": [
-        "2*balcR*(i+1)/nSeg",
-        "balcR*sqrt(1 - ((i+0.5)/nSeg)*((i+0.5)/nSeg))",
+        "2*sqrt(max(0, balcR*balcR - (balcK + balcS*(i+0.5)/nSeg)*(balcK + balcS*(i+0.5)/nSeg)))",
+        "balcS/nSeg",
         "200"
       ],
       "contextOnly": true
+    },
+    {
+      "id": "sideWall",
+      "name": "קיר הצד משמאל (להמחשה)",
+      "profile": "wallP",
+      "count": "sideD > 0 ? 1 : 0",
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "-wallOff - 200",
+        "wallY - sideD",
+        "-150"
+      ],
+      "size": [
+        "200",
+        "sideD",
+        "sideH + 150"
+      ]
+    },
+    {
+      "id": "lamp",
+      "name": "המנורה שמעל הדלת (להמחשה)",
+      "profile": "wallP",
+      "count": "lampX > 0 ? 1 : 0",
+      "existing": true,
+      "illustration": true,
+      "at": [
+        "lampX - wallOff - lampW/2",
+        "wallY - lampD",
+        "lampZ"
+      ],
+      "size": [
+        "lampW",
+        "lampD",
+        "lampH"
+      ]
     },
     {
       "id": "anchor",
@@ -1405,34 +1530,6 @@
       ]
     },
     {
-      "label": "מרכז מרפסת",
-      "value": "balcX",
-      "from": [
-        "-wallOff",
-        "wallY - balcR - 150",
-        "balcZ"
-      ],
-      "to": [
-        "balcX - wallOff",
-        "wallY - balcR - 150",
-        "balcZ"
-      ]
-    },
-    {
-      "label": "רדיוס",
-      "value": "balcR",
-      "from": [
-        "balcX - wallOff",
-        "wallY",
-        "balcZ + 230"
-      ],
-      "to": [
-        "balcX - wallOff",
-        "wallY - balcR",
-        "balcZ + 230"
-      ]
-    },
-    {
       "label": "גובה מרפסת",
       "value": "balcZ",
       "from": [
@@ -1459,10 +1556,116 @@
         "wallY - pavD",
         "-150"
       ]
+    },
+    {
+      "label": "רוחב מרפסת",
+      "value": "balcC",
+      "from": [
+        "balcX - wallOff - balcC/2",
+        "wallY + 60",
+        "balcZ + 260"
+      ],
+      "to": [
+        "balcX - wallOff + balcC/2",
+        "wallY + 60",
+        "balcZ + 260"
+      ]
+    },
+    {
+      "label": "בליטת מרפסת",
+      "value": "balcS",
+      "from": [
+        "balcX - wallOff",
+        "wallY",
+        "balcZ + 230"
+      ],
+      "to": [
+        "balcX - wallOff",
+        "wallY - balcS",
+        "balcZ + 230"
+      ]
+    },
+    {
+      "label": "קיר צד",
+      "value": "sideD",
+      "from": [
+        "-wallOff - 260",
+        "wallY",
+        "sideH"
+      ],
+      "to": [
+        "-wallOff - 260",
+        "wallY - sideD",
+        "sideH"
+      ]
+    },
+    {
+      "label": "מנורה מהקצה",
+      "value": "lampX",
+      "from": [
+        "-wallOff",
+        "wallY - lampD - 60",
+        "lampZ + lampH/2"
+      ],
+      "to": [
+        "lampX - wallOff",
+        "wallY - lampD - 60",
+        "lampZ + lampH/2"
+      ]
+    },
+    {
+      "label": "גובה מנורה",
+      "value": "lampZ",
+      "from": [
+        "lampX - wallOff + lampW/2 + 60",
+        "wallY - lampD - 60",
+        "0"
+      ],
+      "to": [
+        "lampX - wallOff + lampW/2 + 60",
+        "wallY - lampD - 60",
+        "lampZ"
+      ]
+    },
+    {
+      "label": "קצה מרפסת",
+      "value": "balcE",
+      "from": [
+        "-wallOff",
+        "wallY - balcS - 150",
+        "balcZ"
+      ],
+      "to": [
+        "balcE - wallOff",
+        "wallY - balcS - 150",
+        "balcZ"
+      ]
     }
   ],
   "placeView": {
     "azimuth": -35,
     "elevation": 18
-  }
+  },
+  "checks": [
+    {
+      "when": "lampX > 0 && lampX > wallOff && lampX < wallOff + W && lampZ < H + beam_w + 125 && lampZ + lampH > H",
+      "text": "המנורה יושבת בגובה של קורת הקיר: קורת הקיר עוברת בין {H} ל-{H + beam_w + 125} והמנורה בין {lampZ} ל-{lampZ + lampH}. הנמך או הגבה את הגובה החופשי, או הזז את הפרגולה."
+    },
+    {
+      "when": "lampX > 0 && lampX > wallOff && lampX < wallOff + W && lampZ + lampH > H + beam_w + 125 && lampZ < H + beam_w + 125 + purlin_t + 16",
+      "text": "המנורה נוגעת במרישים או ביריעת הגג מעל קורת הקיר. הגבה אותה מעט או הנמך את הגובה החופשי."
+    },
+    {
+      "when": "D < pavD",
+      "text": "הגג מסתיים לפני קצה הריצוף: העומק {D} קטן מעומק הריצוף {pavD}. הגדל את העומק."
+    },
+    {
+      "when": "D >= pavD && D - pavD < beyond",
+      "text": "הגג בולט רק {D - pavD} מ\"מ מעבר לריצוף, פחות מה-{beyond} שביקשת."
+    },
+    {
+      "when": "sideD > 0 && wallOff < 50",
+      "text": "הפרגולה צמודה לקיר הצד: השאר לפחות 50 מ\"מ בין קצה הקורות לקיר הצד."
+    }
+  ]
 }
