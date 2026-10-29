@@ -131,11 +131,11 @@
       "value": 2300,
       "min": 1900,
       "max": 3000,
-      "step": 50,
+      "step": 10,
       "fit": true,
       "fitStage": 1,
-      "suggest": "snap(min(3000, wall_height - 125 - beam_w - purlin_t - 60), 50)",
-      "suggestNote": "הגובה בקיר פחות השיפוע (125), הקורה, המרישים ומרווח",
+      "suggest": "snap(min(3000, max(lampNeedH, wall_height - 125 - beam_w - purlin_t - 16 - 30)), 10)",
+      "suggestNote": "כך שקורת הקיר (125 גבוה יותר) עוברת מעל המנורה, והגג מתחת למרפסת",
       "group": "מידות הפרגולה"
     },
     {
@@ -263,45 +263,12 @@
       "measure": true
     },
     {
-      "id": "lampZ",
-      "label": "גובה תחתית המנורה מהרצפה",
-      "value": 2250,
-      "min": 1500,
-      "max": 4000,
-      "step": 10,
-      "place": true,
-      "group": "המנורה מעל הדלת",
-      "measure": true
-    },
-    {
-      "id": "lampW",
-      "label": "רוחב המנורה (0 אם אין מנורה)",
-      "value": 200,
+      "id": "lampGap",
+      "label": "מהקצה העליון של המנורה עד תחתית המרפסת / סוף הקיר (0 = אין מנורה)",
+      "value": 215,
       "min": 0,
-      "max": 800,
-      "step": 10,
-      "place": true,
-      "group": "המנורה מעל הדלת",
-      "measure": true
-    },
-    {
-      "id": "lampH",
-      "label": "גובה המנורה",
-      "value": 250,
-      "min": 50,
-      "max": 800,
-      "step": 10,
-      "place": true,
-      "group": "המנורה מעל הדלת",
-      "measure": true
-    },
-    {
-      "id": "lampD",
-      "label": "כמה המנורה בולטת מהקיר",
-      "value": 150,
-      "min": 20,
-      "max": 600,
-      "step": 10,
+      "max": 2000,
+      "step": 5,
       "place": true,
       "group": "המנורה מעל הדלת",
       "measure": true
@@ -384,7 +351,13 @@
     "balcK": "balcR - balcS",
     "balcX": "balcE - balcC/2",
     "lampCX": "lampOnDoor ? doorX + doorW/2 : lampX",
-    "hasLamp": "lampW > 0 ? 1 : 0"
+    "hasLamp": "lampGap > 0 ? 1 : 0",
+    "lampTop": "wall_height - lampGap",
+    "lampInSpan": "hasLamp && lampCX > wallOff && lampCX < wallOff + W ? 1 : 0",
+    "lampNeedH": "lampInSpan ? lampTop + 20 - 125 : 0",
+    "lampZ": "lampTop - 200",
+    "lampW": "200",
+    "lampD": "120"
   },
   "dims": [
     {
@@ -631,14 +604,14 @@
       "existing": true,
       "illustration": true,
       "at": [
-        "lampCX - wallOff - lampW/2",
+        "lampCX - lampW/2",
         "wallY - lampD",
         "lampZ"
       ],
       "size": [
         "lampW",
         "lampD",
-        "lampH"
+        "200"
       ]
     },
     {
@@ -1628,26 +1601,12 @@
       "from": [
         "-wallOff",
         "wallY - lampD - 60",
-        "lampZ + lampH/2"
+        "lampTop"
       ],
       "to": [
         "lampCX - wallOff",
         "wallY - lampD - 60",
-        "lampZ + lampH/2"
-      ]
-    },
-    {
-      "label": "גובה מנורה",
-      "value": "lampZ",
-      "from": [
-        "lampCX - wallOff + lampW/2 + 60",
-        "wallY - lampD - 60",
-        "0"
-      ],
-      "to": [
-        "lampCX - wallOff + lampW/2 + 60",
-        "wallY - lampD - 60",
-        "lampZ"
+        "lampTop"
       ]
     },
     {
@@ -1663,6 +1622,20 @@
         "wallY - balcS - 150",
         "balcZ"
       ]
+    },
+    {
+      "label": "מנורה עד המרפסת",
+      "value": "lampGap",
+      "from": [
+        "lampCX - wallOff + lampW/2 + 60",
+        "wallY - lampD - 60",
+        "lampTop"
+      ],
+      "to": [
+        "lampCX - wallOff + lampW/2 + 60",
+        "wallY - lampD - 60",
+        "wall_height"
+      ]
     }
   ],
   "placeView": {
@@ -1671,12 +1644,12 @@
   },
   "checks": [
     {
-      "when": "hasLamp && lampCX > wallOff && lampCX < wallOff + W && lampZ < H + beam_w + 125 && lampZ + lampH > H",
-      "text": "המנורה יושבת בגובה של קורת הקיר: קורת הקיר עוברת בין {H} ל-{H + beam_w + 125} והמנורה בין {lampZ} ל-{lampZ + lampH}. הנמך או הגבה את הגובה החופשי, או הזז את הפרגולה."
+      "when": "lampInSpan && H + 125 < lampTop + 20",
+      "text": "קורת הקיר תתנגש במנורה: תחתית הקורה בקיר (עם השיפוע) ב-{H + 125}, והמנורה מגיעה עד {lampTop}. הגובה החופשי צריך להיות לפחות {lampTop + 20 - 125}."
     },
     {
-      "when": "hasLamp && lampCX > wallOff && lampCX < wallOff + W && lampZ + lampH > H + beam_w + 125 && lampZ < H + beam_w + 125 + purlin_t + 16",
-      "text": "המנורה נוגעת במרישים או ביריעת הגג מעל קורת הקיר. הגבה אותה מעט או הנמך את הגובה החופשי."
+      "when": "H + 125 + beam_w + purlin_t + 16 > wall_height - 20",
+      "text": "אין מקום מתחת למרפסת: הגג מעל קורת הקיר מגיע ל-{H + 125 + beam_w + purlin_t + 16} והמרפסת ב-{wall_height}. הנמך את הגובה החופשי, או השתמש בקורות נמוכות יותר."
     },
     {
       "when": "D < pavD",
