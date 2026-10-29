@@ -365,12 +365,14 @@ function showStep(id) {
 // The measured place: the design's "spaces" fields, plus any param marked place:true (the surroundings:
 // door, balcony, paving...). Designs with placeDims also get a 3D view of the area, drawn from the
 // parts marked existing + illustration, with the measures as dimension lines.
-// "מדדתי" tick on every field the user has to measure on site; remembered per project
-function measureTick(row, key) {
-  const done = new Set(per('measured', []));
-  row.classList.add('chk'); if (done.has(key)) row.classList.add('done');
-  const lab = document.createElement('label'); lab.className = 'm'; lab.innerHTML = `<input type="checkbox" ${done.has(key) ? 'checked' : ''}> מדדתי`;
-  lab.querySelector('input').onchange = e => { const d = new Set(per('measured', [])); e.target.checked ? d.add(key) : d.delete(key); setPer('measured', [...d]); row.classList.toggle('done', e.target.checked); };
+// a tick on every site field: ticked = that measure is drawn as a label in the 3D of the place. Remembered per project.
+// Default: the room/wall measures on, the illustration ones off (so the labels do not pile up).
+const dimShown = (key, dflt) => { const m = per('shownDims', {}); return key in m ? !!m[key] : dflt; };
+function measureTick(row, key, dflt = true) {
+  const on = dimShown(key, dflt);
+  row.classList.add('chk'); if (on) row.classList.add('done');
+  const lab = document.createElement('label'); lab.className = 'm'; lab.title = 'להציג את המידה הזו על המודל'; lab.innerHTML = `<input type="checkbox" ${on ? 'checked' : ''}> במודל`;
+  lab.querySelector('input').onchange = e => { const m = per('shownDims', {}); m[key] = e.target.checked; setPer('shownDims', m); row.classList.toggle('done', e.target.checked); mountSpaceView(); };
   row.appendChild(lab);
 }
 function renderSpaces() {
@@ -396,14 +398,16 @@ function renderSpaces() {
   for (const p of placeParams) {
     if (p.group && p.group !== group) { group = p.group; box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(group)}</h4>`); }
     const row = field(p.label, state.values[p.id] ?? p.value, `min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 1}"`, v => { if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; recompute(); } });
-    if (p.measure) measureTick(row, `param:${p.id}`); box.appendChild(row);
+    if (p.measure) measureTick(row, `param:${p.id}`, false); box.appendChild(row);
   }
   mountSpaceView();
 }
 function placeDims() {
   const r = state.result; if (!r || r.error) return [];
   const out = [];
+  const keyOf = v => { const m = /^(\w+)_(width|depth|height|reserve)$/.exec(v || ''); return m ? `space:${m[1]}:${m[2]}` : `param:${v}`; };
   for (const d of state.design.placeDims || []) {
+    const key = keyOf(d.value); if (!dimShown(key, key.startsWith('space:'))) continue;
     try { out.push({ from: d.from.map(e => evalExpr(e, r.model.scope)), to: d.to.map(e => evalExpr(e, r.model.scope)), label: `${d.label} ${Math.round(evalExpr(d.value, r.model.scope))}`, color: 0xb7742c }); } catch (e) { console.warn('placeDim', d, e); }
   }
   return out;
