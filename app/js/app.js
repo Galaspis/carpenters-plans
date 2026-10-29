@@ -490,6 +490,12 @@ function renderParams() {
     if (p.measure) measureTick(row, `param:${p.id}`);
     box.appendChild(row);
   }
+  if (state.design.plan && state.result && !state.result.error) {
+    const sc = state.result.model.scope;
+    const fill = t => t.replace(/\{([^}]+)\}/g, (_, e) => { try { return String(Math.round(evalExpr(e, sc))); } catch { return '?'; } });
+    box.insertAdjacentHTML('beforeend', `<ol class="plan">${state.design.plan.map(t => `<li>${esc(fill(t))}</li>`).join('')}</ol>`);
+    if (!state.design.params.some(p => !p.place)) return;
+  }
   const reset = document.createElement('button'); reset.className = 'btn small ghost'; reset.style.marginTop = '8px'; reset.textContent = '↺ חזרה למידות המומלצות למקום';
   reset.onclick = () => fitToSpace(true);
   box.appendChild(reset);
