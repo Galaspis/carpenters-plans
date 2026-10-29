@@ -396,7 +396,14 @@ function renderSpaces() {
   }
   let group = null;
   for (const p of placeParams) {
+    if (p.showIf) { try { if (!evalExpr(p.showIf, { ...state.values })) continue; } catch {} }
     if (p.group && p.group !== group) { group = p.group; box.insertAdjacentHTML('beforeend', `<h4 class="grp">${esc(group)}</h4>`); }
+    if (isBool(p)) {
+      const row = document.createElement('label'); row.className = 'switch';
+      row.innerHTML = `<input type="checkbox" ${(state.values[p.id] ?? p.value) > 0 ? 'checked' : ''}> <span>${esc(p.label.replace(/\s*\(1 = כן, 0 = לא\)\s*$/, ''))}</span>`;
+      row.querySelector('input').onchange = e => { state.values[p.id] = e.target.checked ? 1 : 0; recompute(); renderSpaces(); };
+      box.appendChild(row); continue;
+    }
     const row = field(p.label, state.values[p.id] ?? p.value, `min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 1}"`, v => { if (v >= (p.min ?? -Infinity) && v <= (p.max ?? Infinity)) { state.values[p.id] = v; recompute(); } });
     if (p.measure) measureTick(row, `param:${p.id}`, false); box.appendChild(row);
   }
