@@ -493,7 +493,8 @@ function renderParams() {
   if (state.design.plan && state.result && !state.result.error) {
     const sc = state.result.model.scope;
     const fill = t => t.replace(/\{([^}]+)\}/g, (_, e) => { try { return String(Math.round(evalExpr(e, sc))); } catch { return '?'; } });
-    box.insertAdjacentHTML('beforeend', `<ol class="plan">${state.design.plan.map(t => `<li>${esc(fill(t))}</li>`).join('')}</ol>`);
+    const lines = state.design.plan.filter(t => { if (typeof t === 'string') return true; try { return !!evalExpr(t.when, sc); } catch { return false; } }).map(t => typeof t === 'string' ? t : t.text);
+    box.insertAdjacentHTML('beforeend', `<ol class="plan">${lines.map(t => `<li>${esc(fill(t))}</li>`).join('')}</ol>`);
     if (!state.design.params.some(p => !p.place)) return;
   }
   const reset = document.createElement('button'); reset.className = 'btn small ghost'; reset.style.marginTop = '8px'; reset.textContent = '↺ חזרה למידות המומלצות למקום';

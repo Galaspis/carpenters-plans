@@ -249,6 +249,20 @@
       ],
       "pricePerMeter": 22,
       "treated": true
+    },
+    {
+      "id": "pine_t_18x140",
+      "name": "קרש אורן מטופל 18×140 (חיפוי / דק)",
+      "t": 18,
+      "w": 140,
+      "lengths": [
+        2400,
+        3000,
+        3600,
+        4200
+      ],
+      "pricePerMeter": 16,
+      "treated": true
     }
   ],
   "hardware": {
@@ -309,5 +323,5 @@
     "gluePrice": 25,
     "sandpaperPrice": 20
   },
-  "catalogV": 3
+  "catalogV": 4
 }
