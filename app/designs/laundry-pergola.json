@@ -1,7 +1,7 @@
 {
   "id": "laundry-pergola",
   "name": "פרגולת כביסה — גג, צד סגור, מדפים וכיור",
-  "description": "הפרגולה הצמודה לקיר, עם מה שצריך כדי לתלות כביסה בחוץ גם בחורף: הצד הפתוח נסגר בקיר נמוך של קרשים עם וילון גלילה מעליו, או בווילון גלילה לכל הגובה; הקצה הימני נסגר ביחידת מדפים פתוחה (משמאל יש כבר קיר); שולחן פשוט לכיור שכבר יש לך, ומדף על הקיר מעליו. אותן שש מידות מהשטח; כל השאר מחושב. הכול מעץ מטופל, חיבורים פשוטים בברגים.",
+  "description": "הפרגולה הצמודה לקיר, עם מה שצריך כדי לתלות כביסה בחוץ גם בחורף: הצד הפתוח נסגר בקיר נמוך של קרשים עם וילון גלילה מעליו, או בווילון גלילה לכל הגובה; מדפים פתוחים על קיר הצד השמאלי; שולחן פשוט לכיור שכבר יש לך, ומדף על הקיר מעליו. אותן שש מידות מהשטח; כל השאר מחושב. הכול מעץ מטופל, חיבורים פשוטים בברגים.",
   "category": "גינה",
   "units": "mm",
   "view": {
@@ -102,6 +102,18 @@
       "t": 18,
       "w": 140,
       "treated": true
+    },
+    "basin": {
+      "label": "הכיור (להמחשה)",
+      "t": 200,
+      "w": 200,
+      "hardware": true
+    },
+    "fabric": {
+      "label": "וילון גלילה (להמחשה)",
+      "t": 5,
+      "w": 200,
+      "hardware": true
     }
   },
   "params": [
@@ -240,26 +252,22 @@
     "hbPitch": "board_w + 6",
     "nHB": "floor((hwH - hwGap + 6) / hbPitch)",
     "hasWall": "closeMode",
-    "shD": "3*board_w + 2*6",
-    "shX": "W - shD",
-    "shY0": "overhang + post_t",
-    "shLen": "D - beam_t - shY0",
-    "shH": "1800",
-    "nShelf": "4",
-    "shPitch": "(shH - board_t) / (nShelf - 1)",
-    "nShRail": "2",
-    "shRailPitch": "nShRail > 1 ? (shLen - frame_t) / (nShRail - 1) : 0",
     "skW": "600",
     "skDp": "600",
     "skH": "850",
-    "skX": "shX - 150 - skW",
+    "skX": "doorR - wallOff + 150",
     "skY": "D - beam_t - skDp",
     "wsW": "900",
     "wsZ": "1500",
     "wsX": "skX + skW/2 - wsW/2",
     "wsDp": "2*board_w + 6",
-    "nSlat": "3",
-    "slatGap": "(shD - 2*frame_w - nSlat*frame_w) / (nSlat - 1)"
+    "curtainTop": "postH",
+    "curtainBot": "hasWall ? hwH : 20",
+    "nSS": "4",
+    "ssZ0": "500",
+    "ssPitch": "400",
+    "ssLen": "max(400, min(sideD, D - beam_t) - 40)",
+    "ssY": "D - beam_t - 20 - ssLen"
   },
   "dims": [
     {
@@ -354,54 +362,6 @@
         "W",
         "board_t",
         "board_w"
-      ]
-    },
-    {
-      "id": "shPost",
-      "name": "יחידת מדפים: ניצב",
-      "profile": "frame",
-      "count": "2*nShRail",
-      "at": [
-        "shX + (i % 2)*(shD - frame_w)",
-        "shY0 + floor(i/2)*(shLen - frame_t)",
-        "0"
-      ],
-      "size": [
-        "frame_w",
-        "frame_t",
-        "shH"
-      ]
-    },
-    {
-      "id": "shRail",
-      "name": "יחידת מדפים: תומך מדף (בקצוות)",
-      "profile": "frame",
-      "count": "nShelf*nShRail",
-      "at": [
-        "shX + frame_w",
-        "shY0 + (i % nShRail)*(shLen - frame_t)",
-        "floor(i/nShRail)*shPitch + (floor(i/nShRail) == 0 ? 80 : 0) - frame_w"
-      ],
-      "size": [
-        "shD - 2*frame_w",
-        "frame_t",
-        "frame_w"
-      ]
-    },
-    {
-      "id": "shBoard",
-      "name": "יחידת מדפים: שלב מדף (45×70 שטוח)",
-      "profile": "frame",
-      "count": "nShelf*nSlat",
-      "at": [
-        "shX + frame_w + (i % nSlat)*(frame_w + slatGap)",
-        "shY0 + frame_t",
-        "floor(i/nSlat)*shPitch + (floor(i/nSlat) == 0 ? 80 : 0)"
-      ],
-      "size": [
-        "frame_w",
-        "shLen - 2*frame_t",
-        "frame_t"
       ]
     },
     {
@@ -514,6 +474,115 @@
         "wsW",
         "board_w",
         "board_t"
+      ]
+    },
+    {
+      "id": "ssBearer",
+      "name": "מדפי קיר הצד: תומך (מעוגן לקיר הצד)",
+      "profile": "frame",
+      "count": "2*nSS",
+      "at": [
+        "-wallOff",
+        "ssY + 40 + (i % 2)*(ssLen - 80 - frame_t)",
+        "ssZ0 + floor(i/2)*ssPitch - frame_w"
+      ],
+      "size": [
+        "board_w",
+        "frame_t",
+        "frame_w"
+      ]
+    },
+    {
+      "id": "ssBoard",
+      "name": "מדפי קיר הצד: קרש",
+      "profile": "board",
+      "count": "nSS",
+      "at": [
+        "-wallOff",
+        "ssY",
+        "ssZ0 + i*ssPitch"
+      ],
+      "size": [
+        "board_w",
+        "ssLen",
+        "board_t"
+      ]
+    },
+    {
+      "id": "basin",
+      "name": "הכיור (להמחשה)",
+      "profile": "basin",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "at": [
+        "skX + 50",
+        "skY + 60",
+        "skH - 150"
+      ],
+      "size": [
+        "skW - 100",
+        "skDp - 120",
+        "170"
+      ]
+    },
+    {
+      "id": "tap",
+      "name": "הברז (להמחשה)",
+      "profile": "basin",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "at": [
+        "skX + skW/2 - 15",
+        "skY + skDp - 60",
+        "skH"
+      ],
+      "size": [
+        "30",
+        "30",
+        "250"
+      ]
+    },
+    {
+      "id": "curtain",
+      "name": "וילון גלילה (להמחשה)",
+      "profile": "fabric",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "glass": true,
+      "at": [
+        "0",
+        "overhang - 70",
+        "curtainBot"
+      ],
+      "size": [
+        "W",
+        "5",
+        "curtainTop - curtainBot"
+      ]
+    },
+    {
+      "id": "curtainRoll",
+      "name": "גליל הווילון (להמחשה)",
+      "profile": "fabric",
+      "count": 1,
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "at": [
+        "0",
+        "overhang - 100",
+        "postH - 60"
+      ],
+      "size": [
+        "W",
+        "60",
+        "60"
       ]
     },
     {
@@ -1614,186 +1683,6 @@
       "method": "none"
     },
     {
-      "a": "shPost",
-      "b": "base",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "ground",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "paving",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "wall",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "door",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "balc",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "sideWall",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "lamp",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "anchor",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "hanger",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "bracket",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "sheetP",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "base",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "ground",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "paving",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "wall",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "door",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "balc",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "sideWall",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "lamp",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "anchor",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "hanger",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "bracket",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "sheetP",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "base",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "ground",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "paving",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "wall",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "door",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "balc",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "sideWall",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "lamp",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "anchor",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "hanger",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "bracket",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "sheetP",
-      "method": "none"
-    },
-    {
       "a": "skLeg",
       "b": "base",
       "method": "none"
@@ -2274,113 +2163,6 @@
       "method": "none"
     },
     {
-      "a": "shRail",
-      "b": "shPost",
-      "through": "shPost",
-      "count": 2
-    },
-    {
-      "a": "shBoard",
-      "b": "shRail",
-      "through": "shBoard",
-      "count": 1
-    },
-    {
-      "a": "shBoard",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "post",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "frontBeam",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "rafter",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "ledger",
-      "method": "none"
-    },
-    {
-      "a": "shPost",
-      "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "post",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "frontBeam",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "rafter",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "ledger",
-      "method": "none"
-    },
-    {
-      "a": "shRail",
-      "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "post",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "frontBeam",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "rafter",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "ledger",
-      "method": "none"
-    },
-    {
-      "a": "shBoard",
-      "b": "purlin",
-      "method": "none"
-    },
-    {
       "a": "skTopX",
       "b": "skLeg",
       "through": "skTopX",
@@ -2491,21 +2273,6 @@
       "method": "none"
     },
     {
-      "a": "skLeg",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "skLeg",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "skLeg",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
       "a": "skTopX",
       "b": "post",
       "method": "none"
@@ -2528,21 +2295,6 @@
     {
       "a": "skTopX",
       "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "skTopX",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "skTopX",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "skTopX",
-      "b": "shBoard",
       "method": "none"
     },
     {
@@ -2571,21 +2323,6 @@
       "method": "none"
     },
     {
-      "a": "skTopY",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "skTopY",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "skTopY",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
       "a": "skRail",
       "b": "post",
       "method": "none"
@@ -2608,21 +2345,6 @@
     {
       "a": "skRail",
       "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "skRail",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "skRail",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "skRail",
-      "b": "shBoard",
       "method": "none"
     },
     {
@@ -2651,21 +2373,6 @@
       "method": "none"
     },
     {
-      "a": "skBoard",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "skBoard",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "skBoard",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
       "a": "wsBearer",
       "b": "post",
       "method": "none"
@@ -2683,21 +2390,6 @@
     {
       "a": "wsBearer",
       "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "wsBearer",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "wsBearer",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "wsBearer",
-      "b": "shBoard",
       "method": "none"
     },
     {
@@ -2721,21 +2413,6 @@
       "method": "none"
     },
     {
-      "a": "wsBoard",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "wsBoard",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "wsBoard",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
       "a": "hwRailB",
       "b": "frontBeam",
       "method": "none"
@@ -2753,21 +2430,6 @@
     {
       "a": "hwRailB",
       "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "hwRailB",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "hwRailB",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "hwRailB",
-      "b": "shBoard",
       "method": "none"
     },
     {
@@ -2791,21 +2453,6 @@
       "method": "none"
     },
     {
-      "a": "hwRailT",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "hwRailT",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "hwRailT",
-      "b": "shBoard",
-      "method": "none"
-    },
-    {
       "a": "hwStud",
       "b": "frontBeam",
       "method": "none"
@@ -2823,21 +2470,6 @@
     {
       "a": "hwStud",
       "b": "purlin",
-      "method": "none"
-    },
-    {
-      "a": "hwStud",
-      "b": "shPost",
-      "method": "none"
-    },
-    {
-      "a": "hwStud",
-      "b": "shRail",
-      "method": "none"
-    },
-    {
-      "a": "hwStud",
-      "b": "shBoard",
       "method": "none"
     },
     {
@@ -2861,18 +2493,919 @@
       "method": "none"
     },
     {
-      "a": "hwBoard",
-      "b": "shPost",
+      "a": "basin",
+      "b": "hwRailB",
       "method": "none"
     },
     {
-      "a": "hwBoard",
-      "b": "shRail",
+      "a": "basin",
+      "b": "hwRailT",
       "method": "none"
     },
     {
-      "a": "hwBoard",
-      "b": "shBoard",
+      "a": "basin",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "tap",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "curtain",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "curtainRoll",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "basin",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "hwRailB",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "hwRailT",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "curtain",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "curtainRoll",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "tap",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "hwRailB",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "hwRailT",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "curtainRoll",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "curtain",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "hwRailB",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "hwRailT",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "curtainRoll",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "ssBearer",
+      "through": "ssBoard",
+      "count": 1
+    },
+    {
+      "a": "ssBearer",
+      "b": "hwRailB",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "hwRailT",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "basin",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "tap",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "curtain",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "curtainRoll",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "ssBearer",
+      "b": "sheetP",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "hwRailB",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "hwRailT",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "hwStud",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "hwBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "skLeg",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "skTopX",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "skTopY",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "skRail",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "skBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "wsBearer",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "wsBoard",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "basin",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "tap",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "curtain",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "curtainRoll",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "base",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "post",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "frontBeam",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "ledger",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "rafter",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "purlin",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "ground",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "paving",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "wall",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "door",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "balc",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "sideWall",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "lamp",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "anchor",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "hanger",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "bracket",
+      "method": "none"
+    },
+    {
+      "a": "ssBoard",
+      "b": "sheetP",
       "method": "none"
     }
   ],
@@ -2962,8 +3495,8 @@
       "icon": "hook"
     },
     {
-      "name": "עוגנים כימיים M10 לתומכי מדף הקיר (2 לתומך)",
-      "qty": 4,
+      "name": "עוגנים כימיים M10 לתומכי המדפים (2 לתומך: מדף הקיר + מדפי קיר הצד)",
+      "qty": "4 + 4*nSS",
       "price": 14,
       "icon": "screwSmall"
     },
@@ -3086,14 +3619,13 @@
       "tip": "מרזב בחזית אפשר להוסיף אחר כך, אם הטפטוף מפריע."
     },
     {
-      "title": "יחידת המדפים בקצה הימני",
+      "title": "מדפים על קיר הצד",
       "add": [
-        "shPost",
-        "shRail",
-        "shBoard"
+        "ssBearer",
+        "ssBoard"
       ],
-      "text": "הרכב את יחידת המדפים על הרצפה: ארבעה ניצבים, תומך מדף בכל קצה, ושלושה שלבים 45×70 לכל מדף, מונחים על התומכים. הצב אותה בקצה הימני, בין קו העמודים לקיר.",
-      "tip": "השאר 20 מ\"מ מהקיר ומהקורה הקדמית כדי שהמים לא יישארו על העץ."
+      "text": "ארבעה מדפים על קיר הצד השמאלי: לכל מדף שני תומכים 45×70 מעוגנים לקיר, ועליהם קרש 18×140 לכל אורך הקיר.",
+      "tip": "התחל מהמדף העליון; פלס על כל תומך לפני העיגון."
     },
     {
       "title": "שולחן הכיור",
@@ -3290,7 +3822,7 @@
       "when": "!hasWall",
       "text": "הצד הפתוח: וילון גלילה חיצוני לכל הגובה, מהקורה הקדמית ({H} מ\"מ) עד הריצוף, לכל אורך הפרגולה."
     },
-    "בקצה הימני, בין קו העמודים לקיר: יחידת מדפים פתוחה {shD}×{shLen}×{shH} מ\"מ, {nShelf} מדפים. משמאל יש כבר את קיר הצד.",
-    "ליד הקיר, משמאל למדפים: שולחן לכיור {skW}×{skDp}, גובה {skH}, עם מדף תחתון. מעליו מדף קיר ברוחב {wsW} בגובה {wsZ}."
+    "על קיר הצד השמאלי: {nSS} מדפים פתוחים, קרש 18×140 באורך {ssLen} על שני תומכים מעוגנים לקיר, הראשון בגובה {ssZ0} וכל {ssPitch} מעליו. הקצה הימני של הפרגולה נשאר פתוח, הווילון מכסה אותו.",
+    "ליד קיר הבית, מימין לדלת: שולחן לכיור {skW}×{skDp}, גובה {skH}, עם מדף תחתון בגובה 300. מעליו מדף קיר ברוחב {wsW} בגובה {wsZ}."
   ]
 }
