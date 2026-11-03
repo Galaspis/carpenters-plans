@@ -89,8 +89,11 @@ export function buildModel(design, values, catalog, mapping, spaces) {
         const idx = [0, 1, 2].sort((a, b) => size[a] - size[b]);
         ax = { T: idx[0], W: idx[1], L: idx[2] };
       }
+      // marks = holes and slots drawn on the top face (z = max): { type: 'hole'|'slot', n, x, y, d | w, l } with i in expressions
+      const marks = [];
+      for (const mk of def.marks || []) { const n = Math.max(0, Math.round(evalExpr(String(mk.n ?? 1), s))); for (let q = 0; q < n; q++) { const ms = { ...s, i: q }; marks.push({ type: mk.type || 'hole', x: evalExpr(String(mk.x), ms), y: evalExpr(String(mk.y), ms), d: mk.d ? evalExpr(String(mk.d), ms) : 0, w: mk.w ? evalExpr(String(mk.w), ms) : 0, l: mk.l ? evalExpr(String(mk.l), ms) : 0 }); } }
       instances.push({
-        uid: `${def.id}#${i}`, def, defIdx, i, object: def.object, hardware: !!prof.hardware, existing: !!def.existing,
+        uid: `${def.id}#${i}`, def, defIdx, i, marks, object: def.object, hardware: !!prof.hardware, existing: !!def.existing,
         profile: def.profile, prof,
         min: at, max: at.map((v, k) => v + size[k]), size, ax,
         len: size[ax.L], t: size[ax.T], w: size[ax.W],

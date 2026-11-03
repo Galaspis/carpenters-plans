@@ -81,6 +81,20 @@ export function createViewer(container, opts = {}) {
     label(text, a.clone().add(b).multiplyScalar(0.5), cls);
   }
 
+
+// A board ripped at 45°: cross-section in the model's (y, z) plane, extruded along x. Centered like a BoxGeometry.
+// 'rail'  = fixed on the furniture, slope rises toward the front (bevel up and out)
+// 'cleat' = on the hanging piece, the mirror image, so it drops onto the rail
+function prismGeometry(kind, size) {
+  const [L, d, h] = size, y0 = -d / 2, y1 = d / 2, z0 = -h / 2, z1 = h / 2, drop = Math.min(d, h - 2);
+  const poly = kind === 'rail' ? [[y0, z0], [y1, z0], [y1, z1], [y0, z1 - drop]] : [[y0, z0 + drop], [y1, z0], [y1, z1], [y0, z1]];
+  const P = (xx, [yy, zz]) => [xx, zz, -yy]; // model (x,y,z) → three (x, z, -y)
+  const tri = []; const quad = (a, b, c, dd) => tri.push(...a, ...b, ...c, ...a, ...c, ...dd);
+  const A = poly.map(p => P(-L / 2, p)), B = poly.map(p => P(L / 2, p));
+  quad(A[0], A[1], A[2], A[3]); quad(B[3], B[2], B[1], B[0]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; quad(A[i], B[i], B[j], A[j]); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return g;
+}
   function show(instances, opts = {}) {
     const { highlight = new Set(), ghost = new Set(), screws = [], explode = 0, labels: showLabels = false, labelFilter, dims = [], partDims = false } = opts;
     while (group.children.length) { const o = group.children.pop(); o.traverse?.(m => { m.geometry?.dispose(); m.material?.dispose?.(); }); }
@@ -95,12 +109,19 @@ export function createViewer(container, opts = {}) {
       const off = offsetOf(x);
       const size = x.size, mid = x.min.map((v, k) => v + size[k] / 2 + off[k]);
       const isHL = highlight.has(x.uid), isGhost = ghost.has(x.uid) || x.existing;
-      const geo = new THREE.BoxGeometry(size[0], size[2], size[1]);
+      const geo = x.def?.bevel ? prismGeometry(x.def.bevel, size) : new THREE.BoxGeometry(size[0], size[2], size[1]);
       const mesh = new THREE.Mesh(geo, x.def?.glass ? new THREE.MeshLambertMaterial({ color: isHL ? 0xbfd8e8 : 0xdde9f0, transparent: true, opacity: 0.45 }) : x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? 0.45 : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
+      if (x.def?.bevel) mesh.material.side = THREE.DoubleSide;
       mesh.position.copy(toThree(mid)); group.add(mesh);
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: isGhost ? COL.ghostEdge : COL.edge, transparent: isGhost, opacity: isGhost ? 0.5 : 1 }));
       edges.position.copy(mesh.position); group.add(edges);
-      if (!x.existing) bb.expandByObject(mesh); // the camera frames the piece itself, not the neighbours drawn for context
+      for (const mk of x.marks || []) { // a drilled hole or a sawn slot, drawn as a dark shape sitting on the top face
+        const dark = new THREE.MeshLambertMaterial({ color: 0x3a3028 });
+        const zTop = x.max[2] + off[2] + 0.6;
+        if (mk.type === 'slot') { const m2 = new THREE.Mesh(new THREE.BoxGeometry(mk.w || 3, 1.2, mk.l || 40), dark); m2.position.copy(toThree([x.min[0] + off[0] + mk.x, x.min[1] + off[1] + mk.y, zTop])); group.add(m2); }
+        else { const m2 = new THREE.Mesh(new THREE.CylinderGeometry(mk.d / 2, mk.d / 2, 1.2, 20), dark); m2.position.copy(toThree([x.min[0] + off[0] + mk.x, x.min[1] + off[1] + mk.y, zTop])); group.add(m2); }
+      }
+      if (!x.existing) bb.expandByObject(mesh);
       const key = x.partNo;
       if (showLabels && key && !labelled.has(key) && (!labelFilter || labelFilter(x))) {
         labelled.add(key);

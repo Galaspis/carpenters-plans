@@ -819,7 +819,7 @@ function renderOverview() {
   const { model, bom, groups } = r;
   const [W, D, H] = model.bbox.size.map(Math.round);
   box.innerHTML = shareBar('overview') + `
-    <div class="card"><h3>${esc(d.name)}</h3><p class="muted" style="margin:0 0 10px">${esc(d.description || '')}</p>
+    <div class="card"><h3>${esc(d.name)}${d.params.filter(p => p.options).map(p => ' — ' + esc(p.options.find(o => o.value === state.values[p.id])?.label || '')).join('')}</h3><p class="muted" style="margin:0 0 10px">${esc(d.description || '')}</p>
       <div class="modes noprint" id="modes3d"><button data-mode="full" class="active">${ic('overview')}הרהיט המוגמר</button><button data-mode="explode">${ic('exploded')}מפורק עם מספרים</button><button id="dimsToggle" title="הצג/הסתר מידות">${ic('dimensions')}מידות</button></div>
       <div class="row">
         <div style="flex:2 1 420px"><div class="viewer3d noprint" id="viewer3d"><div class="hint">סובב: גרירה · זום: גלגלת · הזזה: לחצן ימני</div></div><img id="print3dFull" class="printonly print3d" alt=""></div>
