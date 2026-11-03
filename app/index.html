@@ -81,10 +81,10 @@
   .suggest { color:var(--accent-text); cursor:pointer; text-decoration:underline; font-weight:600; }
   .switch { display:flex; gap:10px; align-items:center; font-size:16px; cursor:pointer; margin:6px 0; }
   .switch input { width:22px; height:22px; accent-color:var(--accent); }
-  .seg { display:inline-flex; border:1px solid var(--line); border-radius:var(--r-control); overflow:hidden; }
-  .seg button { min-height:40px; padding:4px 14px; border:none; background:#fff; cursor:pointer; font-size:15px; font-weight:600; color:var(--ink); border-inline-start:1px solid var(--line); }
-  .seg button:first-child { border-inline-start:none; }
-  .seg button.active { background:var(--selected); color:var(--accent-text); }
+  .seg { display:flex; flex-wrap:wrap; gap:6px; }
+  .seg button { min-height:40px; padding:4px 12px; border:1px solid var(--line); border-radius:var(--r-control); background:#fff; cursor:pointer; font-size:14px; font-weight:600; color:var(--ink); }
+  .seg button.active { background:var(--selected); color:var(--accent-text); border-color:var(--accent); }
+  .field:has(> .seg) { grid-template-columns: 1fr; }
   input[type=checkbox] { accent-color:var(--accent); }
   .choices { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px; }
   .choice { border:2px solid var(--line); border-radius:var(--r-panel); padding:18px; cursor:pointer; background:#fff; text-align:right; }
@@ -275,7 +275,7 @@
     <button class="hbtn" id="backupBtn" title="גיבוי לקובץ"><img class="ic" src="brand/icons/save.svg" alt=""><span class="t">גיבוי</span></button>
     <button class="hbtn" id="restoreBtn" title="שחזור מקובץ"><img class="ic" src="brand/icons/project-open.svg" alt=""><span class="t">שחזור</span></button>
     <input type="file" id="restoreFile" accept=".json" hidden>
-    <span id="ver" hidden>v82</span>
+    <span id="ver" hidden>v83</span>
   </span>
   <div id="printMenu" class="printmenu" hidden>
     <b>מה להדפיס?</b>

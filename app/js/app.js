@@ -271,6 +271,10 @@ const TEMPLATES = [
     features: [{ param: 'nShelves', label: 'מספר מדפים', type: 'number', min: 2, max: 8 }] },
   { id: 'pergola', icon: '🏡', name: 'פרגולה צמודה לקיר', desc: 'קורת קיר, עמודים קדמיים על בסיסי מתכת, רפטרים ומרישים, גג פוליקרבונט שקוף.', base: 'pergola-leanto',
     features: [{ param: 'spacing', label: 'מרחק בין רפטרים (מ"מ)', type: 'number', min: 400, max: 900 }] },
+  { id: 'cleat', icon: '🧰', name: 'מתלה צרפתי', desc: 'מסילה ב-45° על מסגרת השולחן ומתלים שנתלים עליה: מדפים, קופסאות, מתלה מלחציים, בלוק סכינים. פרויקט לכל מתלה.', base: 'cleat-holder',
+    features: [
+      { param: 'kind', label: 'מה בונים', type: 'choice', options: [{ label: 'המסילה עצמה', value: 0 }, { label: 'מתלה מלחציים', value: 1 }, { label: 'מדף כלי חשמל', value: 2 }, { label: 'מדף מטענים', value: 3 }, { label: 'קופסת ברגים', value: 4 }, { label: 'לוח כלי יד', value: 5 }, { label: 'בלוק מקדחים', value: 6 }, { label: 'בלוק סכינים', value: 7 }, { label: 'תבלינים + נייר מגבת', value: 8 }] },
+    ] },
   { id: 'workbench', icon: '🛠️', name: 'שולחן עבודה נייד', desc: 'שולחן עבודה על גלגלים לגינה: מסגרות 50×100 על עמודים, משטח ומדף מקרשים עם ניקוז, קיר כלים נמוך מאחור.', base: 'garden-workbench',
     features: [
       { param: 'shelf', label: 'מדף תחתון', type: 'bool', on: 1, off: 0 },
@@ -470,7 +474,7 @@ function renderParams() {
     if (p.options) {
       const row = document.createElement('div'); row.className = 'field';
       row.innerHTML = `<label>${esc(label)}</label><span class="seg">${p.options.map(o => `<button type="button" data-v="${o.value}" class="${state.values[p.id] === o.value ? 'active' : ''}">${esc(o.label)}</button>`).join('')}</span>`;
-      row.querySelectorAll('button').forEach(b => b.onclick = () => { state.values[p.id] = +b.dataset.v; setManual(p.id, true); recompute(); renderParams(); });
+      row.querySelectorAll('button').forEach(b => b.onclick = () => { state.values[p.id] = +b.dataset.v; setManual(p.id, true); fitToSpace(false, false); recompute(); renderParams(); });
       box.appendChild(row); continue;
     }
     if (isBool(p)) {

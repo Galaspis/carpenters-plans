@@ -43,5 +43,10 @@
     "id": "garden-workbench",
     "name": "שולחן עבודה נייד לגינה",
     "category": "סדנה"
+  },
+  {
+    "id": "cleat-holder",
+    "name": "מתלה צרפתי — מסילה ומתלים",
+    "category": "סדנה"
   }
 ]

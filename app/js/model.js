@@ -13,7 +13,8 @@ export function autoMapProfiles(design, catalog, current = {}) {
     for (const l of catalog.lumber) {
       if (l.own) continue; // leftovers are boards of a yard wood, never a wood type of their own
       const [t, w] = [Math.min(l.t, l.w), Math.max(l.t, l.w)];
-      let score = Math.abs(t - p.t) * 2 + Math.abs(w - p.w);
+      const [pt, pw] = p.yard || [p.t, p.w]; // a strip ripped from a wider board maps to that board
+      let score = Math.abs(t - pt) * 2 + Math.abs(w - pw);
       if (l.lastUsed) score -= 8; // buying history: a section you already bought wins a near tie
       const treated = l.treated || /מטופל|אימפרגנצ|impreg|treated/i.test(l.name || '');
       if (p.treated) score += treated ? -20 : 60; // outdoor profiles want pressure-treated wood; plain pine only as a last resort
@@ -31,8 +32,8 @@ export function profileDims(design, catalog, mapping) {
     const inv = catalog.inventory || [];
     const own = (!p.hardware && catalog.woodMode === 'own') ? catalog.lumber.find(l => l.own && l.yardId === mapping[key] && inv.some(r => r.itemId === l.id && r.qty > 0)) : null;
     const item = p.hardware ? null : (own || catalog.lumber.find(l => l.id === mapping[key]));
-    const t = item ? Math.min(item.t, item.w) : p.t;
-    const w = item ? Math.max(item.t, item.w) : p.w;
+    const t = item && !p.yard ? Math.min(item.t, item.w) : p.t; // a ripped strip (p.yard) keeps its own section
+    const w = item && !p.yard ? Math.max(item.t, item.w) : p.w;
     out[key] = { key, label: p.label, t, w, item, hardware: !!p.hardware };
   }
   return out;
