@@ -52,7 +52,7 @@ for (const file of files) {
   if (pd.faces.some(f => f.svg.includes('NaN'))) { failed++; console.log('  ! NaN in part drawing'); }
   // every step must draw the screws for that step; last step must contain all boards
   const last = steps[steps.length - 1];
-  if (last.visible.size !== model.instances.length) { failed++; console.log('  ! not all boards placed by the last step'); }
+  if (last.visible.size !== model.instances.filter(x => !x.def.contextOnly).length) { failed++; console.log('  ! not all boards placed by the last step'); } // context-only parts show in the overview only
 }
 console.log(failed ? `\n${failed} problem(s)` : '\nALL OK');
 process.exit(failed ? 1 : 0);

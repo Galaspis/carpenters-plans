@@ -961,6 +961,27 @@ function renderAssembly() {
   }
   box.innerHTML = html; bindShare(box);
   box.querySelectorAll('[data-step3d]').forEach(b => b.onclick = () => open3dModal(+b.dataset.step3d));
+  paintStepPictures();
+}
+// the step figures: snapshots from the real 3D (bevels, holes, context), taken in an offscreen viewer
+let picViewer = null, picJob = 0;
+async function paintStepPictures() {
+  const r = state.result; if (!r || r.error) return;
+  const mod = await loadViewer(); if (!mod) return;
+  const job = ++picJob;
+  if (!picViewer) {
+    const host = document.createElement('div'); host.style.cssText = 'position:fixed;left:-2000px;top:0;width:640px;height:420px;pointer-events:none';
+    document.body.appendChild(host);
+    try { picViewer = mod.createViewer(host, { forceSvg: location.search.includes('svg') }); } catch (e) { console.warn('step pictures', e); return; }
+  }
+  for (const s of r.steps) {
+    if (job !== picJob) return; // a newer plan replaced this one
+    const img = document.querySelector(`#tab-assembly img[data-step3d-img="${s.n}"]`); const fig = img?.nextElementSibling; if (!fig || !s.visible.size) continue;
+    picViewer.show(...viewerArgs('step', s.n));
+    await new Promise(res => setTimeout(res, 40));
+    const src = picViewer.snapshot();
+    fig.innerHTML = `<img src="${src}" alt="" style="width:100%;height:auto;border-radius:8px;background:var(--canvas)">`;
+  }
 }
 function renderCut() {
   const r = state.result, box = $('#tab-cut');

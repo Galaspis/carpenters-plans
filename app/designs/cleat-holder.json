@@ -404,6 +404,44 @@
         "25",
         "25"
       ]
+    },
+    {
+      "id": "railCtx",
+      "name": "המסילה שעל השולחן (להמחשה — כך המתלה יושב עליה)",
+      "profile": "cleat",
+      "count": "kind > 0 ? 1 : 0",
+      "existing": true,
+      "illustration": true,
+      "bevel": "rail",
+      "at": [
+        "-40",
+        "0",
+        "H - 40"
+      ],
+      "size": [
+        "W + 80",
+        "30",
+        "35"
+      ]
+    },
+    {
+      "id": "benchCtx",
+      "name": "פאת מסגרת השולחן (להמחשה)",
+      "profile": "plank",
+      "count": "kind > 0 ? 1 : 0",
+      "existing": true,
+      "illustration": true,
+      "contextOnly": true,
+      "at": [
+        "-120",
+        "-50",
+        "H - 100"
+      ],
+      "size": [
+        "W + 240",
+        "50",
+        "100"
+      ]
     }
   ],
   "joints": [
@@ -561,6 +599,141 @@
     {
       "a": "arm",
       "b": "cleat",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "rail",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "cleat",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "back",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "side",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "bottom",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "lipB",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "div",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "arm",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "bar",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "shelf",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "blk",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "peg",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "roll",
+      "method": "none"
+    },
+    {
+      "a": "railCtx",
+      "b": "benchCtx",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "rail",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "cleat",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "back",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "side",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "bottom",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "lipB",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "div",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "arm",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "bar",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "shelf",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "blk",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "peg",
+      "method": "none"
+    },
+    {
+      "a": "benchCtx",
+      "b": "roll",
       "method": "none"
     }
   ],

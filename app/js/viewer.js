@@ -87,7 +87,7 @@ export function createViewer(container, opts = {}) {
 // 'cleat' = on the hanging piece, the mirror image, so it drops onto the rail
 function prismGeometry(kind, size) {
   const [L, d, h] = size, y0 = -d / 2, y1 = d / 2, z0 = -h / 2, z1 = h / 2, drop = Math.min(d, h - 2);
-  const poly = kind === 'rail' ? [[y0, z0], [y1, z0], [y1, z1], [y0, z1 - drop]] : [[y0, z0 + drop], [y1, z0], [y1, z1], [y0, z1]];
+  const poly = kind === 'rail' ? [[y0, z0], [y1, z0], [y1, z1], [y0, z1 - drop]] : [[y0, z0], [y1, z0 + drop], [y1, z1], [y0, z1]];
   const P = (xx, [yy, zz]) => [xx, zz, -yy]; // model (x,y,z) → three (x, z, -y)
   const tri = []; const quad = (a, b, c, dd) => tri.push(...a, ...b, ...c, ...a, ...c, ...dd);
   const A = poly.map(p => P(-L / 2, p)), B = poly.map(p => P(L / 2, p));

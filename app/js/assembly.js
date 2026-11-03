@@ -27,7 +27,7 @@ export function buildSteps(design, model, joints) {
       visible: new Set(placed), highlight: new Set(adds.filter(x => !x.existing).map(x => x.uid)), view: s.view || design.view,
     });
   }
-  const missing = model.instances.filter(x => !placed.has(x.uid));
+  const missing = model.instances.filter(x => !placed.has(x.uid) && !x.existing); // context parts never need a step
   if (missing.length) {
     const addIds = new Set(missing.map(x => x.uid));
     const jointsHere = joints.filter(j => !usedJoints.has(j));
