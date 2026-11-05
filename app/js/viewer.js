@@ -41,7 +41,7 @@ export function createViewer(container, opts = {}) {
   const group = new THREE.Group(); scene.add(group);
   let labels = []; // { pos: Vector3, el }
   let frame = 0, alive = true, dirty = true, w = 600, h = 420, lastDiag = 0;
-  const byUid = new Map(); let anims = [];
+  const byUid = new Map(); let anims = [], screwItems = [], tool = null;
 
   function resize() {
     w = container.clientWidth || 600; h = container.clientHeight || 420;
@@ -136,7 +136,7 @@ function prismGeometry(kind, size) {
   function show(instances, opts = {}) {
     const { highlight = new Set(), ghost = new Set(), screws = [], explode = 0, labels: showLabels = false, labelFilter, dims = [], partDims = false } = opts;
     while (group.children.length) { const o = group.children.pop(); o.traverse?.(m => { m.geometry?.dispose(); m.material?.dispose?.(); }); }
-    labelLayer.innerHTML = ''; labels = []; byUid.clear();
+    labelLayer.innerHTML = ''; labels = []; byUid.clear(); screwItems = [];
     if (!instances.length) { dirty = true; return; }
     const center = [0, 0, 0];
     for (const x of instances) for (let k = 0; k < 3; k++) center[k] += (x.min[k] + x.max[k]) / 2 / instances.length;
@@ -186,6 +186,7 @@ function prismGeometry(kind, size) {
       shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirv); group.add(shaft);
       const head = new THREE.Mesh(new THREE.CylinderGeometry(s.d, s.d, 3, 12), mat);
       head.position.copy(a.clone().sub(dirv.clone().multiplyScalar(40))); head.quaternion.copy(shaft.quaternion); group.add(head);
+      screwItems.push({ shaft, head, dir: dirv, len: a.distanceTo(b) + 40, home: [shaft.position.clone(), head.position.clone()] });
     }
     for (const d of dims) { dimension(d.from, d.to, d.label, d.color ? 'dim' : 'ov'); bb.expandByPoint(toThree(d.from)); bb.expandByPoint(toThree(d.to)); }
     if (floor.visible && !bb.isEmpty()) { const c0 = bb.getCenter(new THREE.Vector3()), s0 = bb.getSize(new THREE.Vector3()); floor.position.set(c0.x, bb.min.y - 0.5, c0.z); floor.scale.set(s0.length() * 3, s0.length() * 3, 1); const r0 = s0.length(); sun.shadow.camera.left = -r0; sun.shadow.camera.right = r0; sun.shadow.camera.top = r0; sun.shadow.camera.bottom = -r0; sun.shadow.camera.near = 10; sun.shadow.camera.far = r0 * 8; sun.position.set(c0.x + r0 * 0.6, c0.y + r0 * 1.6, c0.z + r0 * 0.8); sun.target.position.copy(c0); sun.target.updateMatrixWorld(); sun.shadow.camera.updateProjectionMatrix(); }
@@ -224,12 +225,51 @@ function prismGeometry(kind, size) {
   }
 
   // fly the given parts in from above (after a show() that already placed them)
-  function flyIn(uids, { dur = 700, height = 250 } = {}) {
+  function flyIn(uids, { dur = 1600, height = 300 } = {}) {
     const t0 = performance.now(); let i = 0;
-    for (const uid of uids) { const e = byUid.get(uid); if (!e) continue; const from = e.target.clone(); from.y += height; e.mesh.position.copy(from); anims.push({ mesh: e.mesh, from, to: e.target.clone(), t0: t0 + i * 60, dur }); i++; }
+    for (const uid of uids) { const e = byUid.get(uid); if (!e) continue; const from = e.target.clone(); from.y += height; e.mesh.position.copy(from); anims.push({ mesh: e.mesh, from, to: e.target.clone(), t0: t0 + i * 250, dur }); i++; }
     dirty = true;
+  }
+
+  // --- the work itself: a driver that comes to each screw and drives it in ---
+  function makeDriver() {
+    const g = new THREE.Group();
+    const grey = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, metalness: 0.6, roughness: 0.4 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(18, 22, 120, 16), new THREE.MeshStandardMaterial({ color: 0x1f8a70, roughness: 0.6 })); body.position.y = 110;
+    const bit = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 60, 8), grey); bit.position.y = 30;
+    const chuck = new THREE.Mesh(new THREE.CylinderGeometry(12, 12, 24, 16), grey); chuck.position.y = 60;
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(34, 110, 40), new THREE.MeshStandardMaterial({ color: 0x202125, roughness: 0.8 })); handle.position.set(0, 150, 50);
+    g.add(body, bit, chuck, handle); return g;
+  }
+  // hide the screws of the current view (before they are "driven"); returns how many
+  function hideScrews() { for (const it of screwItems) { it.shaft.visible = false; it.head.visible = false; } dirty = true; return screwItems.length; }
+  // drive the screws one by one: the driver flies to the screw, spins, the screw sinks in; slow enough to follow
+  async function driveScrews({ per = 1400, maxShown = 14 } = {}) {
+    if (!screwItems.length) return;
+    if (!tool) { tool = makeDriver(); scene.add(tool); }
+    tool.visible = true;
+    const items = screwItems.slice(0, maxShown);
+    for (const it of items) {
+      const up = new THREE.Vector3(0, 1, 0), back = it.dir.clone().negate(); // the tool points along the screw, sitting behind its head
+      tool.quaternion.setFromUnitVectors(up, back);
+      const headHome = it.home[1].clone(), shaftHome = it.home[0].clone();
+      const t0 = performance.now(); const out = it.len; // the screw starts fully outside, head first
+      it.shaft.visible = true; it.head.visible = true;
+      await new Promise(res => {
+        const tick = () => {
+          const k = Math.min(1, (performance.now() - t0) / per), e = k < 0.25 ? 0 : (k - 0.25) / 0.75; // the tool arrives, then drives
+          const d = back.clone().multiplyScalar(out * (1 - e));
+          it.shaft.position.copy(shaftHome).add(d); it.head.position.copy(headHome).add(d);
+          tool.position.copy(headHome).add(d).add(back.clone().multiplyScalar(2));
+          tool.rotateOnAxis(up, 0.35); dirty = true;
+          if (k < 1) requestAnimationFrame(tick); else res();
+        }; tick();
+      });
+    }
+    for (const it of screwItems.slice(maxShown)) { it.shaft.visible = true; it.head.visible = true; }
+    tool.visible = false; dirty = true;
   }
   function autoRotate(on, speed = 1.2) { controls.autoRotate = on; controls.autoRotateSpeed = speed; dirty = true; }
   function destroy() { alive = false; cancelAnimationFrame(frame); ro.disconnect(); controls.dispose(); renderer.dispose?.(); renderer.domElement.remove(); labelLayer.remove(); }
-  return { show, destroy, resize, renderer, snapshot, webgl, setRealistic, flyIn, autoRotate, get realistic() { return realistic; } };
+  return { show, destroy, resize, renderer, snapshot, webgl, setRealistic, flyIn, autoRotate, hideScrews, driveScrews, get realistic() { return realistic; } };
 }

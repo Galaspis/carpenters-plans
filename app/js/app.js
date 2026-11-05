@@ -897,14 +897,18 @@ async function mount3d() {
   playBtn.onclick = async () => {
     if (playing) { playing = false; return; }
     playing = true; playBtn.textContent = '■ עצור';
-    const r = state.result, steps = r.steps; mainViewer.autoRotate(true);
+    const r = state.result, steps = r.steps; mainViewer.autoRotate(true, 0.6);
     for (let n = 1; n <= steps.length && playing; n++) {
       const s = steps[n - 1]; if (!s.highlight.size) continue;
       const vis = r.model.instances.filter(x => s.visible.has(x.uid));
       mainViewer.show(vis, { ghost: new Set(), highlight: new Set(), screws: s.joints.flatMap(j => j.screws), keepCamera: n > 1, dims: [] });
+      const nScrews = mainViewer.hideScrews();
       mainViewer.flyIn([...s.highlight]);
       host.querySelector('.hint').textContent = `שלב ${s.n}: ${s.title}`;
-      await new Promise(res => setTimeout(res, 900 + Math.min(1500, s.highlight.size * 80)));
+      await new Promise(res => setTimeout(res, 1800 + Math.min(3000, s.highlight.size * 250)));
+      if (!playing) break;
+      if (nScrews) { host.querySelector('.hint').textContent = `שלב ${s.n}: ${s.title} — מבריגים`; await mainViewer.driveScrews({ per: 1400 }); }
+      await new Promise(res => setTimeout(res, 800));
     }
     mainViewer.autoRotate(false); playing = false; playBtn.textContent = '▶ הרכבה מונפשת'; host.querySelector('.hint').textContent = 'סובב: גרירה · זום: גלגלת · הזזה: לחצן ימני'; apply();
   };
