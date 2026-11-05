@@ -35,7 +35,7 @@ export function createViewer(container, opts = {}) {
   scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a090, webgl ? 1.1 : 0.9));
   const sun = new THREE.DirectionalLight(0xffffff, webgl ? 1.4 : 0.8); sun.position.set(1500, 3000, 2000); scene.add(sun);
   const hemi = scene.children.find(o => o.isHemisphereLight);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.35 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; floor.visible = false; scene.add(floor);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), new THREE.MeshStandardMaterial({ color: 0x3a3c42, roughness: 0.95, metalness: 0 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; floor.visible = false; scene.add(floor);
   let realistic = false, woodTex = null;
   const fill = new THREE.DirectionalLight(0xffffff, webgl ? 0.5 : 0.3); fill.position.set(-2000, 1000, -1500); scene.add(fill);
   const group = new THREE.Group(); scene.add(group);
@@ -75,11 +75,12 @@ export function createViewer(container, opts = {}) {
   // Pine grain drawn on a canvas: light base, long wavy growth lines, a few knots. Used as the wood map in realistic mode.
   function makeWoodTexture() {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 256; const g = c.getContext('2d');
-    g.fillStyle = '#dcb98a'; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#d9b07c'; g.fillRect(0, 0, c.width, c.height);
     let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-    for (let i = 0; i < 90; i++) { // growth lines along x
+    for (let b = 0; b < 14; b++) { const y = rnd() * c.height, hgt = 8 + rnd() * 26; const grd = g.createLinearGradient(0, y, 0, y + hgt); grd.addColorStop(0, 'rgba(160,110,60,0)'); grd.addColorStop(0.5, `rgba(160,110,60,${0.18 + rnd() * 0.2})`); grd.addColorStop(1, 'rgba(160,110,60,0)'); g.fillStyle = grd; g.fillRect(0, y, c.width, hgt); }
+    for (let i = 0; i < 160; i++) { // growth lines along x
       const y0 = rnd() * c.height, amp = 2 + rnd() * 6, freq = 0.002 + rnd() * 0.004, ph = rnd() * 6.28, wdt = 0.6 + rnd() * 1.8;
-      g.strokeStyle = `rgba(${120 + rnd() * 40 | 0},${80 + rnd() * 30 | 0},${40 + rnd() * 20 | 0},${0.12 + rnd() * 0.22})`; g.lineWidth = wdt; g.beginPath();
+      g.strokeStyle = `rgba(${105 + rnd() * 40 | 0},${65 + rnd() * 30 | 0},${30 + rnd() * 20 | 0},${0.22 + rnd() * 0.33})`; g.lineWidth = wdt; g.beginPath();
       for (let x = 0; x <= c.width; x += 8) { const y = y0 + Math.sin(x * freq + ph) * amp + Math.sin(x * 0.03 + ph) * 0.8; x ? g.lineTo(x, y) : g.moveTo(x, y); }
       g.stroke();
     }
@@ -94,8 +95,8 @@ export function createViewer(container, opts = {}) {
     if (!webgl) return false;
     realistic = on;
     if (on && !woodTex) woodTex = makeWoodTexture();
-    scene.background = new THREE.Color(on ? (dark ? 0x1c1d21 : 0xeff0f1) : 0xeff0f1);
-    hemi.intensity = on ? 0.55 : 1.1; sun.intensity = on ? 2.2 : 1.4; sun.castShadow = on;
+    scene.background = new THREE.Color(on ? (dark ? 0x121316 : 0xeff0f1) : 0xeff0f1);
+    hemi.intensity = on ? 0.7 : 1.1; sun.intensity = on ? 2.6 : 1.4; sun.castShadow = on;
     sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
     fill.intensity = on ? 0.9 : 0.5;
     floor.visible = on;
@@ -150,7 +151,7 @@ function prismGeometry(kind, size) {
       const mesh = new THREE.Mesh(geo, x.def?.glass ? new THREE.MeshLambertMaterial({ color: isHL ? 0xbfd8e8 : 0xdde9f0, transparent: true, opacity: 0.45 }) : x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? (realistic ? 0.18 : 0.45) : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
       if (x.def?.bevel) mesh.material.side = THREE.DoubleSide;
       mesh.position.copy(toThree(mid)); group.add(mesh); byUid.set(x.uid, { mesh, target: mesh.position.clone() });
-      if (realistic && webgl) { mesh.castShadow = !isGhost; mesh.receiveShadow = true; if (mesh.material.map) { const L = x.len || size[0]; mesh.material.map.repeat.set(Math.max(0.3, L / 900), 1); if (x.ax && x.ax.L !== 0) mesh.material.map.rotation = Math.PI / 2; } }
+      if (realistic && webgl) { mesh.castShadow = !isGhost; mesh.receiveShadow = true; if (mesh.material.map) { const L = x.len || size[0]; mesh.material.map.repeat.set(Math.max(0.5, L / 450), 1); if (x.ax && x.ax.L !== 0) mesh.material.map.rotation = Math.PI / 2; } }
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: isGhost ? COL.ghostEdge : COL.edge, transparent: isGhost, opacity: isGhost ? 0.5 : 1 }));
       edges.position.copy(mesh.position); if (!(realistic && webgl)) group.add(edges);
       for (const mk of x.marks || []) { // a drilled hole or a sawn slot, drawn as a dark shape sitting on the top face
