@@ -17,6 +17,7 @@ export function createViewer(container, opts = {}) {
   if (webgl) {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
     renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;border-radius:8px;cursor:grab';
   } else {
     renderer = new SVGRenderer();
@@ -33,10 +34,14 @@ export function createViewer(container, opts = {}) {
   controls.enableDamping = true; controls.dampingFactor = 0.1;
   scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a090, webgl ? 1.1 : 0.9));
   const sun = new THREE.DirectionalLight(0xffffff, webgl ? 1.4 : 0.8); sun.position.set(1500, 3000, 2000); scene.add(sun);
+  const hemi = scene.children.find(o => o.isHemisphereLight);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.35 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; floor.visible = false; scene.add(floor);
+  let realistic = false, woodTex = null;
   const fill = new THREE.DirectionalLight(0xffffff, webgl ? 0.5 : 0.3); fill.position.set(-2000, 1000, -1500); scene.add(fill);
   const group = new THREE.Group(); scene.add(group);
   let labels = []; // { pos: Vector3, el }
   let frame = 0, alive = true, dirty = true, w = 600, h = 420, lastDiag = 0;
+  const byUid = new Map(); let anims = [];
 
   function resize() {
     w = container.clientWidth || 600; h = container.clientHeight || 420;
@@ -57,6 +62,7 @@ export function createViewer(container, opts = {}) {
     if (!alive) return;
     frame = requestAnimationFrame(loop);
     controls.update();
+    if (anims.length) { const now = performance.now(); anims = anims.filter(a => { const k = Math.min(1, (now - a.t0) / a.dur), e = 1 - Math.pow(1 - k, 3); a.mesh.position.lerpVectors(a.from, a.to, e); if (a.mat) a.mat.opacity = e; return k < 1; }); dirty = true; }
     if (webgl || dirty) { renderer.render(scene, camera); placeLabels(); dirty = false; }
   }
   resize(); loop();
@@ -65,8 +71,39 @@ export function createViewer(container, opts = {}) {
     const el = document.createElement('div'); el.className = 'lbl ' + cls; el.textContent = text; labelLayer.appendChild(el);
     labels.push({ pos, el });
   }
+
+  // Pine grain drawn on a canvas: light base, long wavy growth lines, a few knots. Used as the wood map in realistic mode.
+  function makeWoodTexture() {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 256; const g = c.getContext('2d');
+    g.fillStyle = '#dcb98a'; g.fillRect(0, 0, c.width, c.height);
+    let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    for (let i = 0; i < 90; i++) { // growth lines along x
+      const y0 = rnd() * c.height, amp = 2 + rnd() * 6, freq = 0.002 + rnd() * 0.004, ph = rnd() * 6.28, wdt = 0.6 + rnd() * 1.8;
+      g.strokeStyle = `rgba(${120 + rnd() * 40 | 0},${80 + rnd() * 30 | 0},${40 + rnd() * 20 | 0},${0.12 + rnd() * 0.22})`; g.lineWidth = wdt; g.beginPath();
+      for (let x = 0; x <= c.width; x += 8) { const y = y0 + Math.sin(x * freq + ph) * amp + Math.sin(x * 0.03 + ph) * 0.8; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+    }
+    for (let k = 0; k < 3; k++) { // knots
+      const kx = rnd() * c.width, ky = rnd() * c.height, r = 6 + rnd() * 10;
+      for (let q = r; q > 0; q -= 1.5) { g.strokeStyle = `rgba(110,70,35,${0.15 + 0.3 * (1 - q / r)})`; g.lineWidth = 1; g.beginPath(); g.ellipse(kx, ky, q * 1.3, q, 0.3, 0, 6.29); g.stroke(); }
+    }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+  }
+  // realistic mode: wood grain, studio light with shadows, dark or light stage
+  function setRealistic(on, { dark = true } = {}) {
+    if (!webgl) return false;
+    realistic = on;
+    if (on && !woodTex) woodTex = makeWoodTexture();
+    scene.background = new THREE.Color(on ? (dark ? 0x1c1d21 : 0xeff0f1) : 0xeff0f1);
+    hemi.intensity = on ? 0.55 : 1.1; sun.intensity = on ? 2.2 : 1.4; sun.castShadow = on;
+    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
+    fill.intensity = on ? 0.9 : 0.5;
+    floor.visible = on;
+    return true;
+  }
   function material(color, ghost) {
-    const o = { color, transparent: ghost, opacity: ghost ? 0.45 : 1 };
+    const o = { color, transparent: ghost, opacity: ghost ? (realistic ? 0.18 : 0.45) : 1 };
+    if (realistic && webgl && !ghost && color === COL.wood) { const t = woodTex.clone(); t.needsUpdate = true; return new THREE.MeshStandardMaterial({ map: t, roughness: 0.55, metalness: 0, color: 0xffffff }); }
     return webgl ? new THREE.MeshStandardMaterial({ ...o, roughness: 0.85, metalness: 0 }) : new THREE.MeshLambertMaterial(o);
   }
   // dimension line between two model points with end ticks and a label
@@ -98,7 +135,7 @@ function prismGeometry(kind, size) {
   function show(instances, opts = {}) {
     const { highlight = new Set(), ghost = new Set(), screws = [], explode = 0, labels: showLabels = false, labelFilter, dims = [], partDims = false } = opts;
     while (group.children.length) { const o = group.children.pop(); o.traverse?.(m => { m.geometry?.dispose(); m.material?.dispose?.(); }); }
-    labelLayer.innerHTML = ''; labels = [];
+    labelLayer.innerHTML = ''; labels = []; byUid.clear();
     if (!instances.length) { dirty = true; return; }
     const center = [0, 0, 0];
     for (const x of instances) for (let k = 0; k < 3; k++) center[k] += (x.min[k] + x.max[k]) / 2 / instances.length;
@@ -110,11 +147,12 @@ function prismGeometry(kind, size) {
       const size = x.size, mid = x.min.map((v, k) => v + size[k] / 2 + off[k]);
       const isHL = highlight.has(x.uid), isGhost = ghost.has(x.uid) || x.existing;
       const geo = x.def?.bevel ? prismGeometry(x.def.bevel, size) : new THREE.BoxGeometry(size[0], size[2], size[1]);
-      const mesh = new THREE.Mesh(geo, x.def?.glass ? new THREE.MeshLambertMaterial({ color: isHL ? 0xbfd8e8 : 0xdde9f0, transparent: true, opacity: 0.45 }) : x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? 0.45 : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
+      const mesh = new THREE.Mesh(geo, x.def?.glass ? new THREE.MeshLambertMaterial({ color: isHL ? 0xbfd8e8 : 0xdde9f0, transparent: true, opacity: 0.45 }) : x.hardware ? (webgl ? new THREE.MeshStandardMaterial({ color: isHL ? 0x555a60 : 0x7a8086, metalness: 0.7, roughness: 0.35, transparent: isGhost, opacity: isGhost ? (realistic ? 0.18 : 0.45) : 1 }) : new THREE.MeshLambertMaterial({ color: 0x7a8086, transparent: isGhost, opacity: isGhost ? 0.45 : 1 })) : material(isHL ? COL.hl : isGhost ? COL.ghost : COL.wood, isGhost));
       if (x.def?.bevel) mesh.material.side = THREE.DoubleSide;
-      mesh.position.copy(toThree(mid)); group.add(mesh);
+      mesh.position.copy(toThree(mid)); group.add(mesh); byUid.set(x.uid, { mesh, target: mesh.position.clone() });
+      if (realistic && webgl) { mesh.castShadow = !isGhost; mesh.receiveShadow = true; if (mesh.material.map) { const L = x.len || size[0]; mesh.material.map.repeat.set(Math.max(0.3, L / 900), 1); if (x.ax && x.ax.L !== 0) mesh.material.map.rotation = Math.PI / 2; } }
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: isGhost ? COL.ghostEdge : COL.edge, transparent: isGhost, opacity: isGhost ? 0.5 : 1 }));
-      edges.position.copy(mesh.position); group.add(edges);
+      edges.position.copy(mesh.position); if (!(realistic && webgl)) group.add(edges);
       for (const mk of x.marks || []) { // a drilled hole or a sawn slot, drawn as a dark shape sitting on the top face
         const dark = new THREE.MeshLambertMaterial({ color: 0x3a3028 });
         const zTop = x.max[2] + off[2] + 0.6;
@@ -149,6 +187,7 @@ function prismGeometry(kind, size) {
       head.position.copy(a.clone().sub(dirv.clone().multiplyScalar(40))); head.quaternion.copy(shaft.quaternion); group.add(head);
     }
     for (const d of dims) { dimension(d.from, d.to, d.label, d.color ? 'dim' : 'ov'); bb.expandByPoint(toThree(d.from)); bb.expandByPoint(toThree(d.to)); }
+    if (floor.visible && !bb.isEmpty()) { const c0 = bb.getCenter(new THREE.Vector3()), s0 = bb.getSize(new THREE.Vector3()); floor.position.set(c0.x, bb.min.y - 0.5, c0.z); floor.scale.set(s0.length() * 3, s0.length() * 3, 1); const r0 = s0.length(); sun.shadow.camera.left = -r0; sun.shadow.camera.right = r0; sun.shadow.camera.top = r0; sun.shadow.camera.bottom = -r0; sun.shadow.camera.near = 10; sun.shadow.camera.far = r0 * 8; sun.position.set(c0.x + r0 * 0.6, c0.y + r0 * 1.6, c0.z + r0 * 0.8); sun.target.position.copy(c0); sun.target.updateMatrixWorld(); sun.shadow.camera.updateProjectionMatrix(); }
     const diagNow = bb.getSize(new THREE.Vector3()).length() || 1;
     const grewALot = lastDiag && Math.abs(diagNow - lastDiag) / lastDiag > 0.15; // the user's view is kept only while the model stays about the same size
     lastDiag = diagNow;
@@ -182,6 +221,14 @@ function prismGeometry(kind, size) {
     }
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.outerHTML);
   }
+
+  // fly the given parts in from above (after a show() that already placed them)
+  function flyIn(uids, { dur = 700, height = 250 } = {}) {
+    const t0 = performance.now(); let i = 0;
+    for (const uid of uids) { const e = byUid.get(uid); if (!e) continue; const from = e.target.clone(); from.y += height; e.mesh.position.copy(from); anims.push({ mesh: e.mesh, from, to: e.target.clone(), t0: t0 + i * 60, dur }); i++; }
+    dirty = true;
+  }
+  function autoRotate(on, speed = 1.2) { controls.autoRotate = on; controls.autoRotateSpeed = speed; dirty = true; }
   function destroy() { alive = false; cancelAnimationFrame(frame); ro.disconnect(); controls.dispose(); renderer.dispose?.(); renderer.domElement.remove(); labelLayer.remove(); }
-  return { show, destroy, resize, renderer, snapshot, webgl };
+  return { show, destroy, resize, renderer, snapshot, webgl, setRealistic, flyIn, autoRotate, get realistic() { return realistic; } };
 }

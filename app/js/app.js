@@ -820,7 +820,7 @@ function renderOverview() {
   const [W, D, H] = model.bbox.size.map(Math.round);
   box.innerHTML = shareBar('overview') + `
     <div class="card"><h3>${esc(d.name)}${d.params.filter(p => p.options).map(p => ' — ' + esc(p.options.find(o => o.value === state.values[p.id])?.label || '')).join('')}</h3><p class="muted" style="margin:0 0 10px">${esc(d.description || '')}</p>
-      <div class="modes noprint" id="modes3d"><button data-mode="full" class="active">${ic('overview')}הרהיט המוגמר</button><button data-mode="explode">${ic('exploded')}מפורק עם מספרים</button><button id="dimsToggle" title="הצג/הסתר מידות">${ic('dimensions')}מידות</button></div>
+      <div class="modes noprint" id="modes3d"><button data-mode="full" class="active">${ic('overview')}הרהיט המוגמר</button><button data-mode="explode">${ic('exploded')}מפורק עם מספרים</button><button id="dimsToggle" title="הצג/הסתר מידות">${ic('dimensions')}מידות</button><button id="realToggle" title="עץ אמיתי, אור וצל (דורש WebGL)">🎬 מציאותי</button><button id="playBtn" title="הרהיט נבנה לבד, שלב אחרי שלב">▶ הרכבה מונפשת</button></div>
       <div class="row">
         <div style="flex:2 1 420px"><div class="viewer3d noprint" id="viewer3d"><div class="hint">סובב: גרירה · זום: גלגלת · הזזה: לחצן ימני</div></div><img id="print3dFull" class="printonly print3d" alt=""></div>
         ${state.photo ? `<div style="flex:1 1 240px"><img src="${state.photo}" class="photo" style="max-height:340px"></div>` : ''}
@@ -889,6 +889,25 @@ async function mount3d() {
   $$('#modes3d button[data-mode]').forEach(b => b.onclick = () => { $$('#modes3d button[data-mode]').forEach(x => x.classList.remove('active')); b.classList.add('active'); mode = b.dataset.mode; apply(); });
   const dimBtn = $('#dimsToggle');
   dimBtn.classList.toggle('active', showDims); dimBtn.onclick = () => { showDims = !showDims; dimBtn.classList.toggle('active', showDims); apply(); };
+  const realBtn = $('#realToggle'), playBtn = $('#playBtn');
+  if (!mainViewer.webgl) { realBtn.disabled = true; realBtn.title = 'הדפדפן חוסם WebGL — במצב SVG אין טקסטורות וצללים'; }
+  realBtn.classList.toggle('active', !!mainViewer.realistic);
+  realBtn.onclick = () => { const on = !mainViewer.realistic; mainViewer.setRealistic(on); realBtn.classList.toggle('active', on); apply(); };
+  let playing = false;
+  playBtn.onclick = async () => {
+    if (playing) { playing = false; return; }
+    playing = true; playBtn.textContent = '■ עצור';
+    const r = state.result, steps = r.steps; mainViewer.autoRotate(true);
+    for (let n = 1; n <= steps.length && playing; n++) {
+      const s = steps[n - 1]; if (!s.highlight.size) continue;
+      const vis = r.model.instances.filter(x => s.visible.has(x.uid));
+      mainViewer.show(vis, { ghost: new Set(), highlight: new Set(), screws: s.joints.flatMap(j => j.screws), keepCamera: n > 1, dims: [] });
+      mainViewer.flyIn([...s.highlight]);
+      host.querySelector('.hint').textContent = `שלב ${s.n}: ${s.title}`;
+      await new Promise(res => setTimeout(res, 900 + Math.min(1500, s.highlight.size * 80)));
+    }
+    mainViewer.autoRotate(false); playing = false; playBtn.textContent = '▶ הרכבה מונפשת'; host.querySelector('.hint').textContent = 'סובב: גרירה · זום: גלגלת · הזזה: לחצן ימני'; apply();
+  };
 }
 async function open3dModal(stepN) {
   const mod = await loadViewer(); if (!mod) { alert('המודל התלת־ממדי לא זמין.'); return; }
