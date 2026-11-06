@@ -116,3 +116,7 @@ scripts, runs the headless design tests, then syncs `app/` to a static site
 behind Caddy (`deploy/woody.caddy`) and smoke-tests the URL. `release.ps1` is
 the local wrapper that runs the same checks, bumps the version stamp in
 `index.html` and `sw.js` (so phones pick up the update) and pushes.
+
+## Video renderer (parked)
+
+A Blender-based assembly-video experiment lives in `render/` (export + script). Parked on 2026-11-06 by decision: not needed. See `render/README.md` for what exists and how to resume.
